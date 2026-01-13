@@ -567,6 +567,7 @@
 
             const handleStartNewTask = () => {
                 if (newTaskName.trim()) {
+                    onCompleteTask(currentTask.id);
                     onAddTask({ name: newTaskName });
                     setShowNewTaskForm(false);
                     setNewTaskName('');
@@ -646,7 +647,7 @@
                     {showNewTaskForm && (
                         <div className="card" style={{marginTop: '16px'}}>
                             <div className="title" style={{fontSize: '18px'}}>Nueva Tarea</div>
-                            <div className="subtitle" style={{fontSize: '12px'}}>La tarea actual se completará automáticamente</div>
+                            <div className="subtitle" style={{fontSize: '12px'}}>La tarea actual se registrará y se iniciará una nueva</div>
                             <input
                                 className="input"
                                 placeholder="Nombre de la nueva tarea..."
@@ -943,23 +944,7 @@
             }, [tasks]);
 
             const addTask = (taskData) => {
-                // Auto-completar tarea anterior si existe
-                if (currentTask) {
-                    const now = Date.now();
-                    let totalElapsed = currentTask.elapsedTime;
-
-                    if (currentTask.status === 'running') {
-                        totalElapsed += now - currentTask.startTime;
-                    }
-
-                    updateTask(currentTask.id, {
-                        status: 'completed',
-                        endTime: now,
-                        elapsedTime: totalElapsed
-                    });
-                }
-
-                // Crear nueva tarea
+                // Crear nueva tarea (no completar la anterior automáticamente)
                 const newTask = {
                     id: Date.now().toString(),
                     name: taskData.name,
@@ -1021,22 +1006,19 @@
                         });
                     }
 
-                    // Reanudar la tarea seleccionada
-                    updateTask(taskId, {
-                        status: 'running',
+                    // Crear una nueva tarea basada en la anterior
+                    const newTask = {
+                        id: Date.now().toString(),
+                        name: task.name,
                         startTime: Date.now(),
+                        endTime: null,
+                        elapsedTime: 0,
+                        status: 'running',
                         pausedAt: null,
-                        endTime: null
-                    });
-
-                    // Establecer como tarea activa
-                    const updatedTasks = tasks.map(t =>
-                        t.id === taskId
-                            ? {...t, status: 'running', startTime: Date.now(), pausedAt: null, endTime: null}
-                            : t
-                    );
-                    const reactivatedTask = updatedTasks.find(t => t.id === taskId);
-                    setCurrentTask(reactivatedTask);
+                        createdAt: Date.now()
+                    };
+                    setTasks([...tasks, newTask]);
+                    setCurrentTask(newTask);
                 }
             };
 
