@@ -530,7 +530,7 @@
         };
 
         // TaskTracker Component
-        function TaskTracker({ currentTask, onAddTask, onPauseTask, onResumeTask, onCompleteTask }) {
+        function TaskTracker({ currentTask, onAddTask, onPauseTask, onResumeTask, onCompleteTask, onSwitchTask }) {
             const [taskName, setTaskName] = useState('');
             const [currentTime, setCurrentTime] = useState(0);
             const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -567,8 +567,7 @@
 
             const handleStartNewTask = () => {
                 if (newTaskName.trim()) {
-                    onCompleteTask(currentTask.id);
-                    onAddTask({ name: newTaskName });
+                    onSwitchTask(newTaskName);
                     setShowNewTaskForm(false);
                     setNewTaskName('');
                 }
@@ -1042,6 +1041,39 @@
                 }
             };
 
+            const switchTask = (newTaskName) => {
+                // Completar la tarea actual si existe
+                if (currentTask) {
+                    const now = Date.now();
+                    let totalElapsed = currentTask.elapsedTime;
+
+                    if (currentTask.status === 'running') {
+                        totalElapsed += now - currentTask.startTime;
+                    }
+
+                    const updatedTasks = tasks.map(task =>
+                        task.id === currentTask.id
+                            ? { ...task, status: 'completed', endTime: now, elapsedTime: totalElapsed }
+                            : task
+                    );
+
+                    // Crear la nueva tarea
+                    const newTask = {
+                        id: Date.now().toString(),
+                        name: newTaskName,
+                        startTime: Date.now(),
+                        endTime: null,
+                        elapsedTime: 0,
+                        status: 'running',
+                        pausedAt: null,
+                        createdAt: Date.now()
+                    };
+
+                    setTasks([...updatedTasks, newTask]);
+                    setCurrentTask(newTask);
+                }
+            };
+
             const completedTasks = tasks.filter(t => t.status === 'completed');
             const totalAllTime = completedTasks.reduce((sum, task) => sum + task.elapsedTime, 0);
 
@@ -1109,6 +1141,7 @@
                                 onPauseTask={pauseTask}
                                 onResumeTask={resumeTask}
                                 onCompleteTask={completeTask}
+                                onSwitchTask={switchTask}
                             />
                         </div>
 
