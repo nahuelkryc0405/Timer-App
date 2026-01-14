@@ -3,429 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Tiempo</title>
+    <title>Time Tracker</title>
     <link rel="icon" href="27477801.jpg" type="image/jpeg">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         :root {
-            --primary-color: #64B5F6;
-            --accent-color: #1976d2;
+            --primary-color: #4CAF50;
+            --accent-color: #2196F3;
+            --bg-dark: #1a1a1a;
+            --bg-card: #242424;
+            --bg-hover: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --border-color: #333;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemBox, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
         }
-        #root {
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background-color: #1a1a1a;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            padding: 32px 20px;
-            margin-bottom: 32px;
-        }
-        .app-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 8px;
-        }
-        .app-subtitle {
-            font-size: 16px;
-            color: #9e9e9e;
-        }
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-        @media (min-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        @media (min-width: 1200px) {
-            .main-content {
-                grid-template-columns: 500px 1fr;
-            }
-        }
-        .card {
-            background-color: #242424;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-        }
-        .section {
-            margin-bottom: 24px;
-        }
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #333;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e0e0e0;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #9e9e9e;
-            margin-bottom: 24px;
-        }
-        .input {
-            width: 100%;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 16px;
-            font-size: 16px;
-            margin-bottom: 16px;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .input:focus {
-            border-color: var(--primary-color);
-            background-color: #2a2a2a;
-        }
-        .input::placeholder {
-            color: #666;
-        }
-        .button {
-            width: 100%;
+
+        /* Layout Principal */
+        .app { min-height: 100vh; }
+
+        /* Header con Timer - Estilo TMetric */
+        .timer-bar {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
             padding: 16px 24px;
-            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .timer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .task-input {
+            flex: 1;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-        }
-        .button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .button:disabled {
-            background-color: #ccc !important;
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .button-start { background-color: #4CAF50; }
-        .button-pause { background-color: #FF9800; }
-        .button-resume { background-color: #4CAF50; }
-        .button-complete { background-color: #2196F3; }
-        .button-edit { background-color: #FF9800; }
-        .button-delete { background-color: #f44336; }
-        .button-save { background-color: #4CAF50; }
-        .button-cancel { background-color: #999; }
-        .action-button.button-resume { background-color: #4CAF50; }
-        .task-card {
-            background-color: #242424;
-            border-radius: 16px;
-            padding: 32px;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            text-align: center;
-        }
-        .active-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary-color);
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-        .task-name {
-            font-size: 22px;
-            font-weight: bold;
-            color: #e0e0e0;
-            margin-bottom: 24px;
-        }
-        .timer {
-            font-size: 56px;
-            font-weight: bold;
-            color: var(--primary-color);
-            font-family: 'Courier New', monospace;
-            margin-bottom: 8px;
-        }
-        @media (max-width: 767px) {
-            .timer {
-                font-size: 42px;
-            }
-        }
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-left: 12px;
-            animation: pulse 2s infinite;
-        }
-        .status-running { background-color: #4CAF50; }
-        .status-paused { background-color: #FF9800; animation: none; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .status-text {
-            font-size: 14px;
-            color: #9e9e9e;
-            margin-bottom: 32px;
-        }
-        .button-group {
-            display: flex;
-            gap: 12px;
-        }
-        .button-group .button {
-            flex: 1;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .empty-text {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .empty-subtext {
-            font-size: 14px;
-            color: #555;
-        }
-        .task-list-card {
-            background-color: #2a2a2a;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            transition: all 0.2s;
-        }
-        .task-list-card:hover {
-            background-color: #303030;
-            border-color: #444;
-        }
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-        .task-list-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #e0e0e0;
-            flex: 1;
-            margin-right: 12px;
-        }
-        .task-time {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-            font-family: 'Courier New', monospace;
-        }
-        .task-date {
-            font-size: 13px;
-            color: #9e9e9e;
-            margin-bottom: 12px;
-        }
-        .task-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .action-button {
-            flex: 1;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-        }
-        .total-card {
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-            text-align: center;
-            box-shadow: 0 6px 16px rgba(30, 136, 229, 0.3);
-            border: 1px solid var(--accent-color);
-        }
-        .total-label {
-            font-size: 14px;
-            color: #fff;
-            opacity: 0.95;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-        }
-        .total-time {
-            font-size: 48px;
-            font-weight: bold;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 12px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .total-tasks {
-            font-size: 15px;
-            color: #fff;
-            opacity: 0.95;
-            font-weight: 500;
-        }
-        @media (max-width: 767px) {
-            .total-time {
-                font-size: 36px;
-            }
-        }
-        .toggle-container {
-            display: flex;
-            background-color: #2a2a2a;
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 24px;
-            border: 1px solid #333;
-        }
-        .toggle-button {
-            flex: 1;
             padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #9e9e9e;
-            background-color: transparent;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-size: 16px;
+            color: var(--text-primary);
+            outline: none;
         }
-        .toggle-button:hover {
-            color: #e0e0e0;
-        }
-        .toggle-button.active {
-            background-color: var(--accent-color);
-            color: #fff;
-        }
-        .period-card {
-            background-color: #2a2a2a;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            transition: all 0.2s;
-        }
-        .period-card:hover {
-            background-color: #303030;
-            border-color: #444;
-        }
-        .period-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-        .period-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #e0e0e0;
-        }
-        .period-time {
-            font-size: 20px;
+        .task-input:focus { border-color: var(--primary-color); }
+        .task-input::placeholder { color: #666; }
+
+        .timer-display {
+            font-size: 32px;
             font-weight: bold;
-            color: var(--primary-color);
             font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+            min-width: 140px;
+            text-align: center;
         }
-        .period-subtitle {
-            font-size: 13px;
-            color: #9e9e9e;
-            margin-bottom: 12px;
-        }
-        .tasks-list {
+
+        .timer-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .task-item {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .task-item-name {
+        .timer-btn:hover { transform: scale(1.05); }
+        .timer-btn.start { background-color: var(--primary-color); color: white; }
+        .timer-btn.stop { background-color: #f44336; color: white; }
+        .timer-btn.pause { background-color: #FF9800; color: white; }
+
+        .current-task-name {
             font-size: 14px;
-            color: #b0b0b0;
-            flex: 1;
-            margin-right: 12px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-align: center;
         }
-        .task-item-time {
-            font-size: 14px;
-            font-weight: 600;
-            color: #9e9e9e;
-            font-family: 'Courier New', monospace;
+
+        /* Contenido Principal */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
         }
-        .edit-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .edit-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #e0e0e0;
-            margin-bottom: 4px;
-        }
-        .stats-grid {
+
+        /* Stats Cards */
+        .stats-row {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
-        @media (min-width: 640px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
         .stat-card {
-            background-color: #2a2a2a;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
-            border: 1px solid #333;
             text-align: center;
         }
         .stat-label {
             font-size: 12px;
-            color: #9e9e9e;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
-            font-weight: 600;
         }
         .stat-value {
             font-size: 28px;
@@ -433,1171 +125,634 @@
             color: var(--primary-color);
             font-family: 'Courier New', monospace;
         }
-        .history-container {
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 8px;
+        .stat-value.accent { color: var(--accent-color); }
+
+        /* Historial */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
-        .history-container::-webkit-scrollbar {
-            width: 8px;
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
         }
-        .history-container::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 4px;
+
+        .task-entry {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: background-color 0.2s;
         }
-        .history-container::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 4px;
+        .task-entry:hover { background-color: var(--bg-hover); }
+
+        .task-info { flex: 1; }
+        .task-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
-        .history-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .task-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
         }
-        .resume-task-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 8px;
-            margin-left: 8px;
-            cursor: pointer;
+        .task-sessions {
             font-size: 12px;
+            color: var(--accent-color);
+            margin-left: 8px;
+        }
+
+        .task-time {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+        .action-btn:hover { opacity: 0.8; }
+        .action-btn.play { background-color: var(--primary-color); color: white; }
+        .action-btn.delete { background-color: #f44336; color: white; }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+        }
+        .toolbar-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
             transition: all 0.2s;
         }
-        .resume-task-btn:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
+        .toolbar-btn:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--primary-color);
         }
-        .settings-btn {
+
+        /* Settings Button */
+        .settings-fab {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background-color: var(--accent-color);
             color: white;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.2s;
             z-index: 100;
         }
-        .settings-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        .settings-fab:hover { transform: scale(1.1); }
+
+        /* Settings Panel */
+        .settings-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            display: none;
         }
+        .settings-overlay.open { display: block; }
+
         .settings-panel {
             position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100vh;
-            background-color: #242424;
+            top: 0; right: -360px;
+            width: 360px; height: 100vh;
+            background-color: var(--bg-card);
             box-shadow: -4px 0 12px rgba(0,0,0,0.3);
             transition: right 0.3s ease;
             z-index: 101;
             padding: 24px;
             overflow-y: auto;
         }
-        .settings-panel.open {
-            right: 0;
-        }
+        .settings-panel.open { right: 0; }
+
         .settings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 2px solid #333;
+            border-bottom: 1px solid var(--border-color);
         }
         .settings-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
+            font-size: 20px;
+            font-weight: 600;
         }
         .close-btn {
             background: none;
             border: none;
-            color: #e0e0e0;
-            font-size: 28px;
+            color: var(--text-primary);
+            font-size: 24px;
             cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .close-btn:hover {
-            color: var(--primary-color);
+
+        .setting-group {
+            margin-bottom: 20px;
         }
-        .color-picker-group {
-            margin-bottom: 24px;
-        }
-        .color-picker-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #e0e0e0;
+        .setting-label {
+            font-size: 13px;
+            color: var(--text-secondary);
             margin-bottom: 8px;
-        }
-        .color-picker-input {
-            width: 100%;
-            height: 50px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            background-color: #1a1a1a;
-            cursor: pointer;
-        }
-        .color-picker-input:hover {
-            border-color: var(--primary-color);
-        }
-        .settings-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 100;
-            display: none;
-        }
-        .settings-overlay.open {
             display: block;
         }
-        @media (max-width: 767px) {
-            .settings-panel {
-                width: 100%;
-                right: -100%;
-            }
+        .color-input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-dark);
+            cursor: pointer;
         }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-text { font-size: 16px; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .timer-content { flex-wrap: wrap; }
+            .task-input { order: 1; flex-basis: 100%; }
+            .timer-display { font-size: 28px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .settings-panel { width: 100%; right: -100%; }
+        }
+
+        /* Hidden file input */
+        .hidden-input { display: none; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
-        // Storage utilities
+        // Storage
         const STORAGE_KEY = 'time_tracker_tasks';
         const SETTINGS_KEY = 'time_tracker_settings';
 
         const loadTasks = () => {
             try {
-                const storedTasks = localStorage.getItem(STORAGE_KEY);
-                return storedTasks ? JSON.parse(storedTasks) : [];
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-                return [];
-            }
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch { return []; }
         };
 
         const saveTasks = (tasks) => {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-            } catch (error) {
-                console.error('Error saving tasks:', error);
-            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
         };
 
         const loadSettings = () => {
             try {
-                const storedSettings = localStorage.getItem(SETTINGS_KEY);
-                return storedSettings ? JSON.parse(storedSettings) : {
-                    primaryColor: '#64B5F6',
-                    accentColor: '#1976d2'
+                return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
+                    primaryColor: '#4CAF50',
+                    accentColor: '#2196F3'
                 };
-            } catch (error) {
-                console.error('Error loading settings:', error);
-                return {
-                    primaryColor: '#64B5F6',
-                    accentColor: '#1976d2'
-                };
+            } catch {
+                return { primaryColor: '#4CAF50', accentColor: '#2196F3' };
             }
         };
 
         const saveSettings = (settings) => {
-            try {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-            } catch (error) {
-                console.error('Error saving settings:', error);
-            }
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
         };
 
-        // Time formatting utilities
-        const formatTime = (milliseconds) => {
-            const totalSeconds = Math.floor(milliseconds / 1000);
+        // Utils
+        const formatTime = (ms) => {
+            const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         };
 
-        const formatDate = (timestamp) => {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        };
+        const formatDateTime = (ts) => new Date(ts).toLocaleString('es-ES', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
 
-        const formatDateTime = (timestamp) => {
-            const date = new Date(timestamp);
-            return date.toLocaleString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        };
-
-        const getWeekNumber = (date) => {
-            const d = new Date(date);
-            d.setHours(0, 0, 0, 0);
-            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-            const yearStart = new Date(d.getFullYear(), 0, 1);
-            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-            return weekNo;
-        };
-
-        const isToday = (timestamp) => {
+        const isToday = (ts) => {
             const today = new Date();
-            const date = new Date(timestamp);
-            return date.getDate() === today.getDate() &&
-                   date.getMonth() === today.getMonth() &&
-                   date.getFullYear() === today.getFullYear();
+            const date = new Date(ts);
+            return date.toDateString() === today.toDateString();
         };
 
         const calculateBreakTime = (tasks) => {
-            const completedTasks = tasks
-                .filter(t => t.status === 'completed' && t.endTime)
-                .sort((a, b) => a.endTime - b.endTime);
-
-            let totalBreakTime = 0;
-            for (let i = 0; i < completedTasks.length - 1; i++) {
-                const currentEnd = completedTasks[i].endTime;
-                const nextStart = completedTasks[i + 1].createdAt || completedTasks[i + 1].startTime;
-                const breakDuration = nextStart - currentEnd;
-                if (breakDuration > 0) {
-                    totalBreakTime += breakDuration;
-                }
+            const sorted = tasks.filter(t => t.endTime).sort((a, b) => a.endTime - b.endTime);
+            let breaks = 0;
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const gap = (sorted[i + 1].createdAt || sorted[i + 1].startTime) - sorted[i].endTime;
+                if (gap > 0) breaks += gap;
             }
-            return totalBreakTime;
+            return breaks;
         };
 
-        // TaskTracker Component
-        function TaskTracker({ currentTask, onAddTask, onPauseTask, onResumeTask, onCompleteTask, onSwitchTask }) {
-            const [taskName, setTaskName] = useState('');
-            const [currentTime, setCurrentTime] = useState(0);
-            const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-            const [newTaskName, setNewTaskName] = useState('');
-
-            useEffect(() => {
-                let interval;
-                if (currentTask && currentTask.status === 'running') {
-                    interval = setInterval(() => {
-                        const elapsed = currentTask.elapsedTime + (Date.now() - currentTask.startTime);
-                        setCurrentTime(elapsed);
-                    }, 100);
-                } else if (currentTask && currentTask.status === 'paused') {
-                    setCurrentTime(currentTask.elapsedTime);
-                }
-
-                return () => {
-                    if (interval) clearInterval(interval);
-                };
-            }, [currentTask]);
-
-            const handleStartTask = () => {
-                if (taskName.trim()) {
-                    onAddTask({ name: taskName });
-                    setTaskName('');
-                }
-            };
-
-            const handleKeyPress = (e) => {
-                if (e.key === 'Enter' && taskName.trim() && !currentTask) {
-                    handleStartTask();
-                }
-            };
-
-            const handleStartNewTask = () => {
-                if (newTaskName.trim()) {
-                    onSwitchTask(newTaskName);
-                    setShowNewTaskForm(false);
-                    setNewTaskName('');
-                }
-            };
-
-            return (
-                <div>
-                    {!currentTask ? (
-                        <div className="card">
-                            <div className="title">Nueva Tarea</div>
-                            <div className="subtitle">Escribe el nombre de la tarea y comienza a registrar tiempo</div>
-                            <input
-                                className="input"
-                                placeholder="Nombre de la tarea..."
-                                value={taskName}
-                                onChange={(e) => setTaskName(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                            />
-                            <button
-                                className="button button-start"
-                                onClick={handleStartTask}
-                                disabled={!taskName.trim()}
-                            >
-                                Iniciar Tarea
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="task-card">
-                            <div className="active-label">TAREA ACTIVA</div>
-                            <div className="task-name">{currentTask.name}</div>
-                            <div>
-                                <span className="timer">{formatTime(currentTime)}</span>
-                                <span className={`status-indicator ${currentTask.status === 'paused' ? 'status-paused' : 'status-running'}`}></span>
-                            </div>
-                            <div className="status-text">
-                                {currentTask.status === 'running' ? 'En progreso' : 'En pausa'}
-                            </div>
-                            <div className="button-group">
-                                {currentTask.status === 'running' ? (
-                                    <button
-                                        className="button button-pause"
-                                        onClick={() => onPauseTask(currentTask.id)}
-                                    >
-                                        ⏸ Pausar
-                                    </button>
-                                ) : (
-                                    <button
-                                        className="button button-resume"
-                                        onClick={() => onResumeTask(currentTask.id)}
-                                    >
-                                        ▶ Reanudar
-                                    </button>
-                                )}
-                                <button
-                                    className="button button-complete"
-                                    onClick={() => onCompleteTask(currentTask.id)}
-                                >
-                                    ✓ Completar
-                                </button>
-                            </div>
-
-                            {/* Botón para iniciar nueva tarea */}
-                            <div style={{marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #333'}}>
-                                <button
-                                    className="button button-start"
-                                    onClick={() => setShowNewTaskForm(true)}
-                                    style={{fontSize: '14px'}}
-                                >
-                                    + Nueva Tarea
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Formulario para nueva tarea */}
-                    {showNewTaskForm && (
-                        <div className="card" style={{marginTop: '16px'}}>
-                            <div className="title" style={{fontSize: '18px'}}>Nueva Tarea</div>
-                            <div className="subtitle" style={{fontSize: '12px'}}>La tarea actual se registrará y se iniciará una nueva</div>
-                            <input
-                                className="input"
-                                placeholder="Nombre de la nueva tarea..."
-                                value={newTaskName}
-                                onChange={(e) => setNewTaskName(e.target.value)}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && newTaskName.trim()) {
-                                        handleStartNewTask();
-                                    }
-                                }}
-                            />
-                            <div className="button-group">
-                                <button
-                                    className="button button-cancel"
-                                    onClick={() => {
-                                        setShowNewTaskForm(false);
-                                        setNewTaskName('');
-                                    }}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    className="button button-start"
-                                    onClick={handleStartNewTask}
-                                    disabled={!newTaskName.trim()}
-                                >
-                                    Iniciar
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // TaskHistory Component
-        function TaskHistory({ tasks, onUpdateTask, onDeleteTask, onResumeTask }) {
-            const [editingId, setEditingId] = useState(null);
-            const [editName, setEditName] = useState('');
-            const [editTime, setEditTime] = useState('');
-            const [expandedTask, setExpandedTask] = useState(null);
-
-            // Agrupar tareas por nombre
-            const groupedTasks = useMemo(() => {
-                const grouped = {};
-
-                tasks.forEach(task => {
-                    if (!grouped[task.name]) {
-                        grouped[task.name] = {
-                            name: task.name,
-                            totalTime: 0,
-                            lastModified: task.endTime,
-                            count: 0,
-                            tasks: []
-                        };
-                    }
-                    grouped[task.name].totalTime += task.elapsedTime;
-                    grouped[task.name].count += 1;
-                    grouped[task.name].tasks.push(task);
-                    if (task.endTime > grouped[task.name].lastModified) {
-                        grouped[task.name].lastModified = task.endTime;
-                    }
-                });
-
-                // Ordenar las tareas dentro de cada grupo por fecha
-                Object.values(grouped).forEach(group => {
-                    group.tasks.sort((a, b) => b.endTime - a.endTime);
-                });
-
-                // Convertir a array y ordenar por última modificación
-                return Object.values(grouped).sort((a, b) => b.lastModified - a.lastModified);
-            }, [tasks]);
-
-            const handleEdit = (task) => {
-                setEditingId(task.id);
-                setEditName(task.name);
-                const totalSeconds = Math.floor(task.elapsedTime / 1000);
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-                setEditTime(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-            };
-
-            const handleSave = (taskId) => {
-                const timeParts = editTime.split(':');
-                if (timeParts.length === 3) {
-                    const hours = parseInt(timeParts[0]) || 0;
-                    const minutes = parseInt(timeParts[1]) || 0;
-                    const seconds = parseInt(timeParts[2]) || 0;
-                    const totalMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
-
-                    onUpdateTask(taskId, {
-                        name: editName,
-                        elapsedTime: totalMs
-                    });
-                }
-
-                setEditingId(null);
-                setEditName('');
-                setEditTime('');
-            };
-
-            const handleCancel = () => {
-                setEditingId(null);
-                setEditName('');
-                setEditTime('');
-            };
-
-            const handleDeleteGroup = (group) => {
-                if (confirm(`¿Estás seguro de eliminar todas las ${group.count} sesiones de "${group.name}"?`)) {
-                    group.tasks.forEach(task => onDeleteTask(task.id));
-                }
-            };
-
-            return (
-                <div>
-                    <div className="title">Historial de Tareas</div>
-                    <div className="subtitle">
-                        {tasks.length} sesión{tasks.length !== 1 ? 'es' : ''} · {groupedTasks.length} tarea{groupedTasks.length !== 1 ? 's' : ''} única{groupedTasks.length !== 1 ? 's' : ''}
-                    </div>
-
-                    {tasks.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="empty-text">No hay tareas completadas aún</div>
-                            <div className="empty-subtext">Las tareas que completes aparecerán aquí</div>
-                        </div>
-                    ) : (
-                        <div>
-                            {groupedTasks.map((group) => (
-                                <div key={group.name} className="task-list-card">
-                                    <div className="task-header">
-                                        <div className="task-list-name">
-                                            {group.name}
-                                            {group.count > 1 && (
-                                                <span style={{fontSize: '12px', color: '#9e9e9e', marginLeft: '8px'}}>
-                                                    ({group.count} sesiones)
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="task-time">{formatTime(group.totalTime)}</div>
-                                    </div>
-                                    <div className="task-date">
-                                        Última modificación: {formatDateTime(group.lastModified)}
-                                    </div>
-                                    <div className="task-actions">
-                                        <button
-                                            className="action-button button-resume"
-                                            onClick={() => onResumeTask(group.tasks[0].id)}
-                                        >
-                                            ▶ Continuar
-                                        </button>
-                                        {group.count > 1 && (
-                                            <button
-                                                className="action-button"
-                                                style={{backgroundColor: expandedTask === group.name ? '#555' : '#333'}}
-                                                onClick={() => setExpandedTask(expandedTask === group.name ? null : group.name)}
-                                            >
-                                                {expandedTask === group.name ? '▲ Ocultar' : '▼ Ver sesiones'}
-                                            </button>
-                                        )}
-                                        <button
-                                            className="action-button button-delete"
-                                            onClick={() => handleDeleteGroup(group)}
-                                        >
-                                            🗑 Eliminar
-                                        </button>
-                                    </div>
-
-                                    {/* Sesiones individuales expandidas */}
-                                    {expandedTask === group.name && (
-                                        <div style={{marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #333'}}>
-                                            <div style={{fontSize: '14px', fontWeight: '600', color: '#9e9e9e', marginBottom: '12px'}}>
-                                                Sesiones individuales:
-                                            </div>
-                                            {group.tasks.map((task) => (
-                                                <div key={task.id} style={{
-                                                    backgroundColor: '#1a1a1a',
-                                                    padding: '12px',
-                                                    borderRadius: '8px',
-                                                    marginBottom: '8px',
-                                                    border: '1px solid #2a2a2a'
-                                                }}>
-                                                    {editingId === task.id ? (
-                                                        <div className="edit-form">
-                                                            <div className="edit-label">Nombre:</div>
-                                                            <input
-                                                                className="input"
-                                                                value={editName}
-                                                                onChange={(e) => setEditName(e.target.value)}
-                                                                placeholder="Nombre de la tarea"
-                                                            />
-                                                            <div className="edit-label">Tiempo (HH:MM:SS):</div>
-                                                            <input
-                                                                className="input"
-                                                                value={editTime}
-                                                                onChange={(e) => setEditTime(e.target.value)}
-                                                                placeholder="00:00:00"
-                                                            />
-                                                            <div className="button-group">
-                                                                <button
-                                                                    className="button button-cancel"
-                                                                    onClick={handleCancel}
-                                                                >
-                                                                    Cancelar
-                                                                </button>
-                                                                <button
-                                                                    className="button button-save"
-                                                                    onClick={() => handleSave(task.id)}
-                                                                >
-                                                                    Guardar
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
-                                                                <span style={{fontSize: '14px', color: '#e0e0e0'}}>
-                                                                    {formatTime(task.elapsedTime)}
-                                                                </span>
-                                                                <span style={{fontSize: '12px', color: '#9e9e9e'}}>
-                                                                    {formatDateTime(task.endTime)}
-                                                                </span>
-                                                            </div>
-                                                            <div style={{display: 'flex', gap: '8px'}}>
-                                                                <button
-                                                                    style={{
-                                                                        flex: 1,
-                                                                        padding: '6px 12px',
-                                                                        borderRadius: '6px',
-                                                                        border: 'none',
-                                                                        backgroundColor: '#FF9800',
-                                                                        color: 'white',
-                                                                        fontSize: '12px',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                    onClick={() => handleEdit(task)}
-                                                                >
-                                                                    ✏ Editar
-                                                                </button>
-                                                                <button
-                                                                    style={{
-                                                                        flex: 1,
-                                                                        padding: '6px 12px',
-                                                                        borderRadius: '6px',
-                                                                        border: 'none',
-                                                                        backgroundColor: '#f44336',
-                                                                        color: 'white',
-                                                                        fontSize: '12px',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                    onClick={() => {
-                                                                        if (confirm('¿Estás seguro de eliminar esta sesión?')) {
-                                                                            onDeleteTask(task.id);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    🗑 Eliminar
-                                                                </button>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // TaskSummary Component
-        function TaskSummary({ tasks }) {
-            const [viewMode, setViewMode] = useState('daily');
-
-            const summaryData = useMemo(() => {
-                if (viewMode === 'daily') {
-                    const dailyMap = {};
-
-                    tasks.forEach(task => {
-                        const date = formatDate(task.endTime);
-                        if (!dailyMap[date]) {
-                            dailyMap[date] = {
-                                date,
-                                timestamp: task.endTime,
-                                totalTime: 0,
-                                tasks: []
-                            };
-                        }
-                        dailyMap[date].totalTime += task.elapsedTime;
-                        dailyMap[date].tasks.push(task);
-                    });
-
-                    return Object.values(dailyMap).sort((a, b) => b.timestamp - a.timestamp);
-                } else {
-                    const weeklyMap = {};
-
-                    tasks.forEach(task => {
-                        const date = new Date(task.endTime);
-                        const weekNum = getWeekNumber(date);
-                        const year = date.getFullYear();
-                        const key = `${year}-W${weekNum}`;
-
-                        if (!weeklyMap[key]) {
-                            const monday = new Date(date);
-                            monday.setDate(date.getDate() - (date.getDay() || 7) + 1);
-
-                            weeklyMap[key] = {
-                                week: `Semana ${weekNum}, ${year}`,
-                                weekStart: formatDate(monday.getTime()),
-                                timestamp: monday.getTime(),
-                                totalTime: 0,
-                                tasks: []
-                            };
-                        }
-                        weeklyMap[key].totalTime += task.elapsedTime;
-                        weeklyMap[key].tasks.push(task);
-                    });
-
-                    return Object.values(weeklyMap).sort((a, b) => b.timestamp - a.timestamp);
-                }
-            }, [tasks, viewMode]);
-
-            const totalAllTime = tasks.reduce((sum, task) => sum + task.elapsedTime, 0);
-
-            return (
-                <div>
-                    <div className="title">Resumen de Tiempo</div>
-
-                    <div className="toggle-container">
-                        <button
-                            className={`toggle-button ${viewMode === 'daily' ? 'active' : ''}`}
-                            onClick={() => setViewMode('daily')}
-                        >
-                            Diario
-                        </button>
-                        <button
-                            className={`toggle-button ${viewMode === 'weekly' ? 'active' : ''}`}
-                            onClick={() => setViewMode('weekly')}
-                        >
-                            Semanal
-                        </button>
-                    </div>
-
-                    <div className="total-card">
-                        <div className="total-label">Tiempo Total Registrado</div>
-                        <div className="total-time">{formatTime(totalAllTime)}</div>
-                        <div className="total-tasks">
-                            {tasks.length} tarea{tasks.length !== 1 ? 's' : ''} completada{tasks.length !== 1 ? 's' : ''}
-                        </div>
-                    </div>
-
-                    {summaryData.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="empty-text">No hay datos para mostrar</div>
-                            <div className="empty-subtext">Completa algunas tareas para ver el resumen</div>
-                        </div>
-                    ) : (
-                        <div>
-                            {summaryData.map((period, index) => (
-                                <div key={index} className="period-card">
-                                    <div className="period-header">
-                                        <div className="period-title">
-                                            {viewMode === 'daily' ? period.date : period.week}
-                                        </div>
-                                        <div className="period-time">{formatTime(period.totalTime)}</div>
-                                    </div>
-                                    <div className="period-subtitle">
-                                        {period.tasks.length} tarea{period.tasks.length !== 1 ? 's' : ''}
-                                    </div>
-                                    <div className="tasks-list">
-                                        {period.tasks.map((task, taskIndex) => (
-                                            <div key={taskIndex} className="task-item">
-                                                <div className="task-item-name">• {task.name}</div>
-                                                <div className="task-item-time">{formatTime(task.elapsedTime)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // Main App Component
+        // Main App
         function App() {
             const [tasks, setTasks] = useState([]);
             const [currentTask, setCurrentTask] = useState(null);
-            const [viewMode, setViewMode] = useState('daily');
-            const [historyViewMode, setHistoryViewMode] = useState('summary'); // 'summary' o 'history'
+            const [taskName, setTaskName] = useState('');
+            const [currentTime, setCurrentTime] = useState(0);
             const [settings, setSettings] = useState(loadSettings());
             const [showSettings, setShowSettings] = useState(false);
+            const fileInputRef = useRef(null);
 
+            // Load tasks
             useEffect(() => {
-                const loadedTasks = loadTasks();
-                setTasks(loadedTasks);
-
-                const inProgressTask = loadedTasks.find(task => task.status === 'running' || task.status === 'paused');
-                if (inProgressTask) {
-                    setCurrentTask(inProgressTask);
+                const loaded = loadTasks();
+                setTasks(loaded);
+                const active = loaded.find(t => t.status === 'running' || t.status === 'paused');
+                if (active) {
+                    setCurrentTask(active);
+                    setTaskName(active.name);
                 }
             }, []);
 
-            useEffect(() => {
-                saveTasks(tasks);
-            }, [tasks]);
+            // Save tasks
+            useEffect(() => { saveTasks(tasks); }, [tasks]);
 
+            // Apply settings
             useEffect(() => {
                 saveSettings(settings);
-                // Aplicar colores CSS
                 document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
                 document.documentElement.style.setProperty('--accent-color', settings.accentColor);
             }, [settings]);
 
-            const addTask = (taskData) => {
-                // Crear nueva tarea (no completar la anterior automáticamente)
+            // Timer
+            useEffect(() => {
+                let interval;
+                if (currentTask?.status === 'running') {
+                    interval = setInterval(() => {
+                        setCurrentTime(currentTask.elapsedTime + (Date.now() - currentTask.startTime));
+                    }, 100);
+                } else if (currentTask?.status === 'paused') {
+                    setCurrentTime(currentTask.elapsedTime);
+                } else {
+                    setCurrentTime(0);
+                }
+                return () => clearInterval(interval);
+            }, [currentTask]);
+
+            // Actions
+            const startTask = () => {
+                if (!taskName.trim()) return;
+
+                // Complete current task if exists
+                if (currentTask) {
+                    completeCurrentTask();
+                }
+
                 const newTask = {
                     id: Date.now().toString(),
-                    name: taskData.name,
+                    name: taskName.trim(),
                     startTime: Date.now(),
                     endTime: null,
                     elapsedTime: 0,
                     status: 'running',
-                    pausedAt: null,
                     createdAt: Date.now()
                 };
-                setTasks([...tasks, newTask]);
+                setTasks(prev => [...prev, newTask]);
                 setCurrentTask(newTask);
             };
 
-            const updateTask = (taskId, updates) => {
-                setTasks(tasks.map(task =>
-                    task.id === taskId ? { ...task, ...updates } : task
+            const completeCurrentTask = () => {
+                if (!currentTask) return;
+                const now = Date.now();
+                let elapsed = currentTask.elapsedTime;
+                if (currentTask.status === 'running') {
+                    elapsed += now - currentTask.startTime;
+                }
+
+                setTasks(prev => prev.map(t =>
+                    t.id === currentTask.id
+                        ? { ...t, status: 'completed', endTime: now, elapsedTime: elapsed }
+                        : t
                 ));
-
-                if (currentTask && currentTask.id === taskId) {
-                    setCurrentTask({ ...currentTask, ...updates });
-                }
             };
 
-            const deleteTask = (taskId) => {
-                setTasks(tasks.filter(task => task.id !== taskId));
-                if (currentTask && currentTask.id === taskId) {
-                    setCurrentTask(null);
-                }
+            const stopTask = () => {
+                completeCurrentTask();
+                setCurrentTask(null);
+                setTaskName('');
             };
 
-            const pauseTask = (taskId) => {
-                const task = tasks.find(t => t.id === taskId);
-                if (task && task.status === 'running') {
-                    const now = Date.now();
-                    const elapsed = task.elapsedTime + (now - task.startTime);
-                    updateTask(taskId, {
-                        status: 'paused',
-                        pausedAt: now,
-                        elapsedTime: elapsed
-                    });
-                }
+            const pauseTask = () => {
+                if (!currentTask || currentTask.status !== 'running') return;
+                const now = Date.now();
+                const elapsed = currentTask.elapsedTime + (now - currentTask.startTime);
+                const updated = { ...currentTask, status: 'paused', elapsedTime: elapsed };
+                setTasks(prev => prev.map(t => t.id === currentTask.id ? updated : t));
+                setCurrentTask(updated);
             };
 
-            const resumeTask = (taskId) => {
-                const task = tasks.find(t => t.id === taskId);
-                if (task && (task.status === 'paused' || task.status === 'completed')) {
-                    // Si hay una tarea activa, completarla primero
-                    if (currentTask && currentTask.id !== taskId) {
-                        const now = Date.now();
-                        let totalElapsed = currentTask.elapsedTime;
-                        if (currentTask.status === 'running') {
-                            totalElapsed += now - currentTask.startTime;
+            const resumeTask = () => {
+                if (!currentTask || currentTask.status !== 'paused') return;
+                const updated = { ...currentTask, status: 'running', startTime: Date.now() };
+                setTasks(prev => prev.map(t => t.id === currentTask.id ? updated : t));
+                setCurrentTask(updated);
+            };
+
+            const continueTask = (taskName) => {
+                if (currentTask) completeCurrentTask();
+
+                const newTask = {
+                    id: Date.now().toString(),
+                    name: taskName,
+                    startTime: Date.now(),
+                    endTime: null,
+                    elapsedTime: 0,
+                    status: 'running',
+                    createdAt: Date.now()
+                };
+                setTasks(prev => [...prev, newTask]);
+                setCurrentTask(newTask);
+                setTaskName(taskName);
+            };
+
+            const deleteTask = (name) => {
+                if (!confirm(`Eliminar todas las sesiones de "${name}"?`)) return;
+                setTasks(prev => prev.filter(t => t.name !== name));
+            };
+
+            // Export/Import
+            const exportData = () => {
+                const data = { tasks, settings, exportedAt: new Date().toISOString() };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `time-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const importData = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.tasks) {
+                            setTasks(data.tasks);
+                            if (data.settings) setSettings(data.settings);
+                            alert('Datos importados correctamente');
                         }
-                        updateTask(currentTask.id, {
-                            status: 'completed',
-                            endTime: now,
-                            elapsedTime: totalElapsed
-                        });
+                    } catch {
+                        alert('Error al importar el archivo');
                     }
-
-                    // Crear una nueva tarea basada en la anterior
-                    const newTask = {
-                        id: Date.now().toString(),
-                        name: task.name,
-                        startTime: Date.now(),
-                        endTime: null,
-                        elapsedTime: 0,
-                        status: 'running',
-                        pausedAt: null,
-                        createdAt: Date.now()
-                    };
-                    setTasks([...tasks, newTask]);
-                    setCurrentTask(newTask);
-                }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
             };
 
-            const completeTask = (taskId) => {
-                const task = tasks.find(t => t.id === taskId);
-                if (task) {
-                    const now = Date.now();
-                    let totalElapsed = task.elapsedTime;
-
-                    if (task.status === 'running') {
-                        totalElapsed += now - task.startTime;
-                    }
-
-                    updateTask(taskId, {
-                        status: 'completed',
-                        endTime: now,
-                        elapsedTime: totalElapsed
-                    });
-
-                    setCurrentTask(null);
-                }
-            };
-
-            const switchTask = (newTaskName) => {
-                // Completar la tarea actual si existe
-                if (currentTask) {
-                    const now = Date.now();
-                    let totalElapsed = currentTask.elapsedTime;
-
-                    if (currentTask.status === 'running') {
-                        totalElapsed += now - currentTask.startTime;
-                    }
-
-                    const updatedTasks = tasks.map(task =>
-                        task.id === currentTask.id
-                            ? { ...task, status: 'completed', endTime: now, elapsedTime: totalElapsed }
-                            : task
-                    );
-
-                    // Crear la nueva tarea
-                    const newTask = {
-                        id: Date.now().toString(),
-                        name: newTaskName,
-                        startTime: Date.now(),
-                        endTime: null,
-                        elapsedTime: 0,
-                        status: 'running',
-                        pausedAt: null,
-                        createdAt: Date.now()
-                    };
-
-                    setTasks([...updatedTasks, newTask]);
-                    setCurrentTask(newTask);
-                }
-            };
-
+            // Computed
             const completedTasks = tasks.filter(t => t.status === 'completed');
-            const totalAllTime = completedTasks.reduce((sum, task) => sum + task.elapsedTime, 0);
-
-            // Calcular tiempo de hoy
             const todayTasks = completedTasks.filter(t => isToday(t.endTime));
-            const todayTotalTime = todayTasks.reduce((sum, task) => sum + task.elapsedTime, 0);
+            const todayTime = todayTasks.reduce((sum, t) => sum + t.elapsedTime, 0);
+            const totalTime = completedTasks.reduce((sum, t) => sum + t.elapsedTime, 0);
+            const todayBreaks = calculateBreakTime(todayTasks);
 
-            // Calcular break time de hoy
-            const todayBreakTime = calculateBreakTime(todayTasks);
-
-            const summaryData = useMemo(() => {
-                if (viewMode === 'daily') {
-                    const dailyMap = {};
-
-                    completedTasks.forEach(task => {
-                        const date = formatDate(task.endTime);
-                        if (!dailyMap[date]) {
-                            dailyMap[date] = {
-                                date,
-                                timestamp: task.endTime,
-                                totalTime: 0,
-                                tasks: []
-                            };
-                        }
-                        dailyMap[date].totalTime += task.elapsedTime;
-                        dailyMap[date].tasks.push(task);
-                    });
-
-                    return Object.values(dailyMap).sort((a, b) => b.timestamp - a.timestamp);
-                } else {
-                    const weeklyMap = {};
-
-                    completedTasks.forEach(task => {
-                        const date = new Date(task.endTime);
-                        const weekNum = getWeekNumber(date);
-                        const year = date.getFullYear();
-                        const key = `${year}-W${weekNum}`;
-
-                        if (!weeklyMap[key]) {
-                            const monday = new Date(date);
-                            monday.setDate(date.getDate() - (date.getDay() || 7) + 1);
-
-                            weeklyMap[key] = {
-                                week: `Semana ${weekNum}, ${year}`,
-                                weekStart: formatDate(monday.getTime()),
-                                timestamp: monday.getTime(),
-                                totalTime: 0,
-                                tasks: []
-                            };
-                        }
-                        weeklyMap[key].totalTime += task.elapsedTime;
-                        weeklyMap[key].tasks.push(task);
-                    });
-
-                    return Object.values(weeklyMap).sort((a, b) => b.timestamp - a.timestamp);
-                }
-            }, [completedTasks, viewMode]);
+            // Group tasks by name
+            const groupedTasks = useMemo(() => {
+                const groups = {};
+                completedTasks.forEach(t => {
+                    if (!groups[t.name]) {
+                        groups[t.name] = { name: t.name, totalTime: 0, lastModified: t.endTime, count: 0 };
+                    }
+                    groups[t.name].totalTime += t.elapsedTime;
+                    groups[t.name].count++;
+                    if (t.endTime > groups[t.name].lastModified) {
+                        groups[t.name].lastModified = t.endTime;
+                    }
+                });
+                return Object.values(groups).sort((a, b) => b.lastModified - a.lastModified);
+            }, [completedTasks]);
 
             return (
-                <div className="container">
-                    <div className="header">
-                        <div className="app-title">⏱ Registro de Tiempo</div>
-                        <div className="app-subtitle">Gestiona y monitorea tu tiempo de trabajo</div>
-                    </div>
-
-                    <div className="main-content">
-                        {/* Columna izquierda - Temporizador y acciones */}
-                        <div>
-                            <TaskTracker
-                                currentTask={currentTask}
-                                onAddTask={addTask}
-                                onPauseTask={pauseTask}
-                                onResumeTask={resumeTask}
-                                onCompleteTask={completeTask}
-                                onSwitchTask={switchTask}
+                <div className="app">
+                    {/* Timer Bar */}
+                    <div className="timer-bar">
+                        <div className="timer-content">
+                            <input
+                                className="task-input"
+                                placeholder="Que estas haciendo?"
+                                value={taskName}
+                                onChange={(e) => setTaskName(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && startTask()}
                             />
-                        </div>
 
-                        {/* Columna derecha - Estadísticas e historial */}
-                        <div>
-                            {/* Estadísticas de hoy */}
-                            <div className="section">
-                                <div className="stats-grid">
-                                    <div className="stat-card">
-                                        <div className="stat-label">Hoy Trabajado</div>
-                                        <div className="stat-value">{formatTime(todayTotalTime)}</div>
-                                    </div>
-                                    <div className="stat-card">
-                                        <div className="stat-label">Breaks Hoy</div>
-                                        <div className="stat-value">{formatTime(todayBreakTime)}</div>
-                                    </div>
-                                </div>
+                            <div className="timer-display">
+                                {formatTime(currentTask ? currentTime : 0)}
                             </div>
 
-                            {/* Estadísticas totales */}
-                            <div className="section">
-                                <div className="total-card">
-                                    <div className="total-label">Tiempo Total Registrado</div>
-                                    <div className="total-time">{formatTime(totalAllTime)}</div>
-                                    <div className="total-tasks">
-                                        {completedTasks.length} tarea{completedTasks.length !== 1 ? 's' : ''} completada{completedTasks.length !== 1 ? 's' : ''}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Resumen por período */}
-                            <div className="section">
-                                <div className="section-title">
-                                    {historyViewMode === 'summary' ? 'Resumen de Tiempo' : 'Historial de Tareas'}
-                                </div>
-
-                                {/* Toggle entre Summary e History */}
-                                <div className="toggle-container" style={{marginBottom: '16px'}}>
-                                    <button
-                                        className={`toggle-button ${historyViewMode === 'summary' ? 'active' : ''}`}
-                                        onClick={() => setHistoryViewMode('summary')}
-                                    >
-                                        Resumen
-                                    </button>
-                                    <button
-                                        className={`toggle-button ${historyViewMode === 'history' ? 'active' : ''}`}
-                                        onClick={() => setHistoryViewMode('history')}
-                                    >
-                                        Historial
-                                    </button>
-                                </div>
-
-                                {/* Toggle de período (solo en modo summary) */}
-                                {historyViewMode === 'summary' && (
-                                    <div className="toggle-container">
-                                        <button
-                                            className={`toggle-button ${viewMode === 'daily' ? 'active' : ''}`}
-                                            onClick={() => setViewMode('daily')}
-                                        >
-                                            Diario
+                            {!currentTask ? (
+                                <button
+                                    className="timer-btn start"
+                                    onClick={startTask}
+                                    disabled={!taskName.trim()}
+                                    title="Iniciar"
+                                >
+                                    ▶
+                                </button>
+                            ) : (
+                                <>
+                                    {currentTask.status === 'running' ? (
+                                        <button className="timer-btn pause" onClick={pauseTask} title="Pausar">
+                                            ⏸
                                         </button>
-                                        <button
-                                            className={`toggle-button ${viewMode === 'weekly' ? 'active' : ''}`}
-                                            onClick={() => setViewMode('weekly')}
-                                        >
-                                            Semanal
-                                        </button>
-                                    </div>
-                                )}
-
-                                <div className="history-container">
-                                    {historyViewMode === 'summary' ? (
-                                        summaryData.length === 0 ? (
-                                            <div className="empty-state">
-                                                <div className="empty-text">No hay datos para mostrar</div>
-                                                <div className="empty-subtext">Completa algunas tareas para ver el resumen</div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                {summaryData.map((period, index) => (
-                                                    <div key={index} className="period-card">
-                                                        <div className="period-header">
-                                                            <div className="period-title">
-                                                                {viewMode === 'daily' ? period.date : period.week}
-                                                            </div>
-                                                            <div className="period-time">{formatTime(period.totalTime)}</div>
-                                                        </div>
-                                                        <div className="period-subtitle">
-                                                            {period.tasks.length} tarea{period.tasks.length !== 1 ? 's' : ''}
-                                                        </div>
-                                                        <div className="tasks-list">
-                                                            {period.tasks.map((task, taskIndex) => (
-                                                                <div key={taskIndex} className="task-item">
-                                                                    <div className="task-item-name">• {task.name}</div>
-                                                                    <div className="task-item-time">{formatTime(task.elapsedTime)}</div>
-                                                                    <button
-                                                                        className="resume-task-btn"
-                                                                        onClick={() => resumeTask(task.id)}
-                                                                        title="Reanudar esta tarea"
-                                                                    >
-                                                                        ▶
-                                                                    </button>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )
                                     ) : (
-                                        <TaskHistory
-                                            tasks={completedTasks}
-                                            onUpdateTask={updateTask}
-                                            onDeleteTask={deleteTask}
-                                            onResumeTask={resumeTask}
-                                        />
+                                        <button className="timer-btn start" onClick={resumeTask} title="Continuar">
+                                            ▶
+                                        </button>
                                     )}
-                                </div>
-                            </div>
+                                    <button className="timer-btn stop" onClick={stopTask} title="Detener">
+                                        ⏹
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    {/* Botón de configuración */}
-                    <button className="settings-btn" onClick={() => setShowSettings(true)}>
+                    {/* Main Content */}
+                    <div className="main-content">
+                        {/* Stats */}
+                        <div className="stats-row">
+                            <div className="stat-card">
+                                <div className="stat-label">Hoy</div>
+                                <div className="stat-value">{formatTime(todayTime)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">Breaks Hoy</div>
+                                <div className="stat-value accent">{formatTime(todayBreaks)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">Total</div>
+                                <div className="stat-value">{formatTime(totalTime)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">Tareas</div>
+                                <div className="stat-value accent">{groupedTasks.length}</div>
+                            </div>
+                        </div>
+
+                        {/* Task List */}
+                        <div className="section-header">
+                            <div className="section-title">Historial</div>
+                            <div className="toolbar">
+                                <button className="toolbar-btn" onClick={exportData}>
+                                    Exportar JSON
+                                </button>
+                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()}>
+                                    Importar JSON
+                                </button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".json"
+                                    className="hidden-input"
+                                    onChange={importData}
+                                />
+                            </div>
+                        </div>
+
+                        {groupedTasks.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-icon">⏱</div>
+                                <div className="empty-text">
+                                    Ingresa el nombre de una tarea y presiona play para comenzar
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                {groupedTasks.map(task => (
+                                    <div key={task.name} className="task-entry">
+                                        <div className="task-info">
+                                            <div className="task-name">
+                                                {task.name}
+                                                {task.count > 1 && (
+                                                    <span className="task-sessions">
+                                                        {task.count} sesiones
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="task-meta">
+                                                {formatDateTime(task.lastModified)}
+                                            </div>
+                                        </div>
+                                        <div className="task-time">{formatTime(task.totalTime)}</div>
+                                        <div className="task-actions">
+                                            <button
+                                                className="action-btn play"
+                                                onClick={() => continueTask(task.name)}
+                                                title="Continuar"
+                                            >
+                                                ▶
+                                            </button>
+                                            <button
+                                                className="action-btn delete"
+                                                onClick={() => deleteTask(task.name)}
+                                                title="Eliminar"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Settings FAB */}
+                    <button className="settings-fab" onClick={() => setShowSettings(true)}>
                         ⚙
                     </button>
 
-                    {/* Overlay */}
+                    {/* Settings Panel */}
                     <div
                         className={`settings-overlay ${showSettings ? 'open' : ''}`}
                         onClick={() => setShowSettings(false)}
-                    ></div>
-
-                    {/* Panel de configuración */}
+                    />
                     <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
                         <div className="settings-header">
-                            <div className="settings-title">Configuración</div>
+                            <div className="settings-title">Configuracion</div>
                             <button className="close-btn" onClick={() => setShowSettings(false)}>×</button>
                         </div>
 
-                        <div className="color-picker-group">
-                            <label className="color-picker-label">Color Principal</label>
+                        <div className="setting-group">
+                            <label className="setting-label">Color Principal</label>
                             <input
                                 type="color"
-                                className="color-picker-input"
+                                className="color-input"
                                 value={settings.primaryColor}
                                 onChange={(e) => setSettings({...settings, primaryColor: e.target.value})}
                             />
                         </div>
 
-                        <div className="color-picker-group">
-                            <label className="color-picker-label">Color de Acento</label>
+                        <div className="setting-group">
+                            <label className="setting-label">Color de Acento</label>
                             <input
                                 type="color"
-                                className="color-picker-input"
+                                className="color-input"
                                 value={settings.accentColor}
                                 onChange={(e) => setSettings({...settings, accentColor: e.target.value})}
                             />
                         </div>
 
-                        <div className="section" style={{marginTop: '32px'}}>
-                            <div className="section-title">Vista Previa</div>
-                            <div className="total-card" style={{marginBottom: '16px'}}>
-                                <div className="total-label">Ejemplo de Card</div>
-                                <div className="total-time">12:34:56</div>
-                            </div>
+                        <div className="setting-group" style={{marginTop: '32px'}}>
+                            <label className="setting-label">Datos</label>
+                            <button
+                                className="toolbar-btn"
+                                style={{width: '100%', marginBottom: '8px'}}
+                                onClick={exportData}
+                            >
+                                Exportar JSON
+                            </button>
+                            <button
+                                className="toolbar-btn"
+                                style={{width: '100%'}}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                Importar JSON
+                            </button>
                         </div>
                     </div>
                 </div>
