@@ -9,13 +9,17 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+        :root {
+            --primary-color: #64B5F6;
+            --accent-color: #1976d2;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemBox, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background-color: #1a1a1a;
             color: #e0e0e0;
         }
@@ -37,7 +41,7 @@
         .app-title {
             font-size: 32px;
             font-weight: 700;
-            color: #64B5F6;
+            color: var(--primary-color);
             margin-bottom: 8px;
         }
         .app-subtitle {
@@ -72,7 +76,7 @@
         .section-title {
             font-size: 20px;
             font-weight: 700;
-            color: #64B5F6;
+            color: var(--primary-color);
             margin-bottom: 16px;
             padding-bottom: 8px;
             border-bottom: 2px solid #333;
@@ -101,7 +105,7 @@
             transition: all 0.2s;
         }
         .input:focus {
-            border-color: #64B5F6;
+            border-color: var(--primary-color);
             background-color: #2a2a2a;
         }
         .input::placeholder {
@@ -148,7 +152,7 @@
         .active-label {
             font-size: 12px;
             font-weight: 700;
-            color: #64B5F6;
+            color: var(--primary-color);
             letter-spacing: 1px;
             margin-bottom: 12px;
         }
@@ -161,7 +165,7 @@
         .timer {
             font-size: 56px;
             font-weight: bold;
-            color: #64B5F6;
+            color: var(--primary-color);
             font-family: 'Courier New', monospace;
             margin-bottom: 8px;
         }
@@ -238,7 +242,7 @@
         .task-time {
             font-size: 20px;
             font-weight: bold;
-            color: #64B5F6;
+            color: var(--primary-color);
             font-family: 'Courier New', monospace;
         }
         .task-date {
@@ -261,13 +265,13 @@
             cursor: pointer;
         }
         .total-card {
-            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
             border-radius: 16px;
             padding: 32px;
             margin-bottom: 24px;
             text-align: center;
             box-shadow: 0 6px 16px rgba(30, 136, 229, 0.3);
-            border: 1px solid #1976d2;
+            border: 1px solid var(--accent-color);
         }
         .total-label {
             font-size: 14px;
@@ -321,7 +325,7 @@
             color: #e0e0e0;
         }
         .toggle-button.active {
-            background-color: #1976d2;
+            background-color: var(--accent-color);
             color: #fff;
         }
         .period-card {
@@ -351,7 +355,7 @@
         .period-time {
             font-size: 20px;
             font-weight: bold;
-            color: #64B5F6;
+            color: var(--primary-color);
             font-family: 'Courier New', monospace;
         }
         .period-subtitle {
@@ -425,7 +429,7 @@
         .stat-value {
             font-size: 28px;
             font-weight: bold;
-            color: #64B5F6;
+            color: var(--primary-color);
             font-family: 'Courier New', monospace;
         }
         .history-container {
@@ -462,6 +466,111 @@
             background-color: #45a049;
             transform: scale(1.05);
         }
+        .settings-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .settings-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: #242424;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 101;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        .settings-panel.open {
+            right: 0;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #333;
+        }
+        .settings-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn:hover {
+            color: var(--primary-color);
+        }
+        .color-picker-group {
+            margin-bottom: 24px;
+        }
+        .color-picker-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+        }
+        .color-picker-input {
+            width: 100%;
+            height: 50px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #1a1a1a;
+            cursor: pointer;
+        }
+        .color-picker-input:hover {
+            border-color: var(--primary-color);
+        }
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            display: none;
+        }
+        .settings-overlay.open {
+            display: block;
+        }
+        @media (max-width: 767px) {
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -472,6 +581,7 @@
 
         // Storage utilities
         const STORAGE_KEY = 'time_tracker_tasks';
+        const SETTINGS_KEY = 'time_tracker_settings';
 
         const loadTasks = () => {
             try {
@@ -488,6 +598,30 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
             } catch (error) {
                 console.error('Error saving tasks:', error);
+            }
+        };
+
+        const loadSettings = () => {
+            try {
+                const storedSettings = localStorage.getItem(SETTINGS_KEY);
+                return storedSettings ? JSON.parse(storedSettings) : {
+                    primaryColor: '#64B5F6',
+                    accentColor: '#1976d2'
+                };
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                return {
+                    primaryColor: '#64B5F6',
+                    accentColor: '#1976d2'
+                };
+            }
+        };
+
+        const saveSettings = (settings) => {
+            try {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            } catch (error) {
+                console.error('Error saving settings:', error);
             }
         };
 
@@ -527,6 +661,31 @@
             const yearStart = new Date(d.getFullYear(), 0, 1);
             const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
             return weekNo;
+        };
+
+        const isToday = (timestamp) => {
+            const today = new Date();
+            const date = new Date(timestamp);
+            return date.getDate() === today.getDate() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getFullYear() === today.getFullYear();
+        };
+
+        const calculateBreakTime = (tasks) => {
+            const completedTasks = tasks
+                .filter(t => t.status === 'completed' && t.endTime)
+                .sort((a, b) => a.endTime - b.endTime);
+
+            let totalBreakTime = 0;
+            for (let i = 0; i < completedTasks.length - 1; i++) {
+                const currentEnd = completedTasks[i].endTime;
+                const nextStart = completedTasks[i + 1].createdAt || completedTasks[i + 1].startTime;
+                const breakDuration = nextStart - currentEnd;
+                if (breakDuration > 0) {
+                    totalBreakTime += breakDuration;
+                }
+            }
+            return totalBreakTime;
         };
 
         // TaskTracker Component
@@ -927,6 +1086,8 @@
             const [tasks, setTasks] = useState([]);
             const [currentTask, setCurrentTask] = useState(null);
             const [viewMode, setViewMode] = useState('daily');
+            const [settings, setSettings] = useState(loadSettings());
+            const [showSettings, setShowSettings] = useState(false);
 
             useEffect(() => {
                 const loadedTasks = loadTasks();
@@ -941,6 +1102,13 @@
             useEffect(() => {
                 saveTasks(tasks);
             }, [tasks]);
+
+            useEffect(() => {
+                saveSettings(settings);
+                // Aplicar colores CSS
+                document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
+                document.documentElement.style.setProperty('--accent-color', settings.accentColor);
+            }, [settings]);
 
             const addTask = (taskData) => {
                 // Crear nueva tarea (no completar la anterior automáticamente)
@@ -1077,6 +1245,13 @@
             const completedTasks = tasks.filter(t => t.status === 'completed');
             const totalAllTime = completedTasks.reduce((sum, task) => sum + task.elapsedTime, 0);
 
+            // Calcular tiempo de hoy
+            const todayTasks = completedTasks.filter(t => isToday(t.endTime));
+            const todayTotalTime = todayTasks.reduce((sum, task) => sum + task.elapsedTime, 0);
+
+            // Calcular break time de hoy
+            const todayBreakTime = calculateBreakTime(todayTasks);
+
             const summaryData = useMemo(() => {
                 if (viewMode === 'daily') {
                     const dailyMap = {};
@@ -1147,6 +1322,20 @@
 
                         {/* Columna derecha - Estadísticas e historial */}
                         <div>
+                            {/* Estadísticas de hoy */}
+                            <div className="section">
+                                <div className="stats-grid">
+                                    <div className="stat-card">
+                                        <div className="stat-label">Hoy Trabajado</div>
+                                        <div className="stat-value">{formatTime(todayTotalTime)}</div>
+                                    </div>
+                                    <div className="stat-card">
+                                        <div className="stat-label">Breaks Hoy</div>
+                                        <div className="stat-value">{formatTime(todayBreakTime)}</div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Estadísticas totales */}
                             <div className="section">
                                 <div className="total-card">
@@ -1215,6 +1404,53 @@
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Botón de configuración */}
+                    <button className="settings-btn" onClick={() => setShowSettings(true)}>
+                        ⚙
+                    </button>
+
+                    {/* Overlay */}
+                    <div
+                        className={`settings-overlay ${showSettings ? 'open' : ''}`}
+                        onClick={() => setShowSettings(false)}
+                    ></div>
+
+                    {/* Panel de configuración */}
+                    <div className={`settings-panel ${showSettings ? 'open' : ''}`}>
+                        <div className="settings-header">
+                            <div className="settings-title">Configuración</div>
+                            <button className="close-btn" onClick={() => setShowSettings(false)}>×</button>
+                        </div>
+
+                        <div className="color-picker-group">
+                            <label className="color-picker-label">Color Principal</label>
+                            <input
+                                type="color"
+                                className="color-picker-input"
+                                value={settings.primaryColor}
+                                onChange={(e) => setSettings({...settings, primaryColor: e.target.value})}
+                            />
+                        </div>
+
+                        <div className="color-picker-group">
+                            <label className="color-picker-label">Color de Acento</label>
+                            <input
+                                type="color"
+                                className="color-picker-input"
+                                value={settings.accentColor}
+                                onChange={(e) => setSettings({...settings, accentColor: e.target.value})}
+                            />
+                        </div>
+
+                        <div className="section" style={{marginTop: '32px'}}>
+                            <div className="section-title">Vista Previa</div>
+                            <div className="total-card" style={{marginBottom: '16px'}}>
+                                <div className="total-label">Ejemplo de Card</div>
+                                <div className="total-time">12:34:56</div>
                             </div>
                         </div>
                     </div>
