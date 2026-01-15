@@ -256,59 +256,72 @@
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 16px;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
             transition: background-color 0.2s;
-            cursor: pointer;
         }
         .task-entry:hover { background-color: var(--bg-hover); }
 
-        .task-info { flex: 1; }
-        .task-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        .task-meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .task-sessions {
-            font-size: 12px;
-            color: var(--accent-color);
-            margin-left: 8px;
-        }
-
-        .task-time {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-color);
-            font-family: 'Courier New', monospace;
+        .task-entry-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
         }
 
         .task-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            flex-shrink: 0;
         }
         .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
         }
-        .action-btn:hover { opacity: 0.8; }
+        .action-btn:hover { opacity: 0.8; transform: scale(1.05); }
         .action-btn.play { background-color: var(--primary-color); color: white; }
+        .action-btn.edit { background-color: #FF9800; color: white; }
         .action-btn.delete { background-color: #f44336; color: white; }
+
+        .task-info { flex: 1; min-width: 0; }
+        .task-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .task-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .task-sessions-badge {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--accent-color);
+            background-color: rgba(33, 150, 243, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .task-time {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+            flex-shrink: 0;
+        }
 
         /* Toolbar */
         .toolbar {
@@ -429,34 +442,52 @@
         /* Hidden file input */
         .hidden-input { display: none; }
 
-        /* Task Entry Expandable */
-        .task-entry-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+        /* Sessions Detail */
         .task-sessions-detail {
-            margin-top: 12px;
-            padding-top: 12px;
             border-top: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            padding: 12px 16px;
+        }
+        .sessions-header {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
         }
         .session-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            background-color: var(--bg-dark);
+            padding: 10px 12px;
+            background-color: var(--bg-card);
             border-radius: 6px;
             margin-bottom: 6px;
+            border-left: 3px solid var(--primary-color);
+        }
+        .session-item:last-child { margin-bottom: 0; }
+        .session-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--bg-hover);
+            color: var(--text-secondary);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .session-info { flex: 1; }
+        .session-date {
             font-size: 13px;
+            color: var(--text-primary);
         }
         .session-time {
+            font-size: 15px;
+            font-weight: 600;
             color: var(--primary-color);
             font-family: 'Courier New', monospace;
-            font-weight: 600;
-        }
-        .session-date {
-            color: var(--text-secondary);
         }
 
         /* Modal */
@@ -533,8 +564,6 @@
             background-color: var(--primary-color);
             color: white;
         }
-
-        .action-btn.edit { background-color: #FF9800; color: white; }
     </style>
 </head>
 <body>
@@ -973,31 +1002,35 @@
                                 {todayGroupedTasks.map(task => (
                                     <div key={`today-${task.name}`} className="task-entry">
                                         <div
-                                            className="task-entry-header"
+                                            className="task-entry-main"
                                             onClick={() => setExpandedTask(expandedTask === `today-${task.name}` ? null : `today-${task.name}`)}
                                         >
+                                            <div className="task-actions" onClick={(e) => e.stopPropagation()}>
+                                                <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
+                                                <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
+                                                <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
+                                            </div>
                                             <div className="task-info">
                                                 <div className="task-name">
                                                     {task.name}
                                                     {task.count > 1 && (
-                                                        <span className="task-sessions">{task.count} sesiones</span>
+                                                        <span className="task-sessions-badge">{task.count} sesiones</span>
                                                     )}
                                                 </div>
                                                 <div className="task-meta">{formatDateTime(task.lastModified)}</div>
                                             </div>
                                             <div className="task-time">{formatTime(task.totalTime)}</div>
                                         </div>
-                                        <div className="task-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
-                                            <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
-                                            <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
-                                        </div>
                                         {expandedTask === `today-${task.name}` && task.sessions.length > 0 && (
                                             <div className="task-sessions-detail">
-                                                {task.sessions.map(session => (
+                                                <div className="sessions-header">Sesiones registradas</div>
+                                                {task.sessions.map((session, idx) => (
                                                     <div key={session.id} className="session-item">
-                                                        <span className="session-time">{formatTime(session.elapsedTime)}</span>
-                                                        <span className="session-date">{formatDateTime(session.endTime)}</span>
+                                                        <div className="session-number">{task.sessions.length - idx}</div>
+                                                        <div className="session-info">
+                                                            <div className="session-date">{formatDateTime(session.endTime)}</div>
+                                                        </div>
+                                                        <div className="session-time">{formatTime(session.elapsedTime)}</div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -1027,31 +1060,35 @@
                                 {groupedTasks.map(task => (
                                     <div key={task.name} className="task-entry">
                                         <div
-                                            className="task-entry-header"
+                                            className="task-entry-main"
                                             onClick={() => setExpandedTask(expandedTask === task.name ? null : task.name)}
                                         >
+                                            <div className="task-actions" onClick={(e) => e.stopPropagation()}>
+                                                <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
+                                                <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
+                                                <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
+                                            </div>
                                             <div className="task-info">
                                                 <div className="task-name">
                                                     {task.name}
                                                     {task.count > 1 && (
-                                                        <span className="task-sessions">{task.count} sesiones</span>
+                                                        <span className="task-sessions-badge">{task.count} sesiones</span>
                                                     )}
                                                 </div>
                                                 <div className="task-meta">{formatDateTime(task.lastModified)}</div>
                                             </div>
                                             <div className="task-time">{formatTime(task.totalTime)}</div>
                                         </div>
-                                        <div className="task-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
-                                            <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
-                                            <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
-                                        </div>
                                         {expandedTask === task.name && task.sessions.length > 0 && (
                                             <div className="task-sessions-detail">
-                                                {task.sessions.map(session => (
+                                                <div className="sessions-header">Sesiones registradas</div>
+                                                {task.sessions.map((session, idx) => (
                                                     <div key={session.id} className="session-item">
-                                                        <span className="session-time">{formatTime(session.elapsedTime)}</span>
-                                                        <span className="session-date">{formatDateTime(session.endTime)}</span>
+                                                        <div className="session-number">{task.sessions.length - idx}</div>
+                                                        <div className="session-info">
+                                                            <div className="session-date">{formatDateTime(session.endTime)}</div>
+                                                        </div>
+                                                        <div className="session-time">{formatTime(session.elapsedTime)}</div>
                                                     </div>
                                                 ))}
                                             </div>
