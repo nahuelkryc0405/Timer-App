@@ -29,67 +29,179 @@
         /* Layout Principal */
         .app { min-height: 100vh; }
 
-        /* Header con Timer - Estilo TMetric */
-        .timer-bar {
+        /* Header */
+        .app-header {
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
             padding: 16px 24px;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            text-align: center;
         }
-        .timer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .task-input {
-            flex: 1;
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 16px;
+        .app-title {
+            font-size: 20px;
+            font-weight: 600;
             color: var(--text-primary);
-            outline: none;
         }
-        .task-input:focus { border-color: var(--primary-color); }
-        .task-input::placeholder { color: #666; }
 
-        .timer-display {
-            font-size: 32px;
+        /* Active Task Card */
+        .active-task-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .active-task-label {
+            font-size: 12px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .active-task-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        .active-timer {
+            font-size: 48px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            color: var(--text-primary);
-            min-width: 140px;
-            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 8px;
         }
-
-        .timer-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .timer-btn:hover { transform: scale(1.05); }
-        .timer-btn.start { background-color: var(--primary-color); color: white; }
-        .timer-btn.stop { background-color: #f44336; color: white; }
-        .timer-btn.pause { background-color: #FF9800; color: white; }
-
-        .current-task-name {
+        .active-status {
             font-size: 14px;
             color: var(--text-secondary);
-            margin-top: 8px;
-            text-align: center;
+            margin-bottom: 20px;
         }
+        .active-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .active-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .active-btn:hover { transform: translateY(-1px); }
+        .active-btn.pause { background-color: #FF9800; }
+        .active-btn.resume { background-color: var(--primary-color); }
+        .active-btn.complete { background-color: var(--accent-color); }
+
+        .new-task-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+            margin-top: 8px;
+        }
+        .new-task-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .new-task-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .new-task-form {
+            background-color: var(--bg-hover);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .new-task-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .new-task-input:focus { border-color: var(--primary-color); }
+        .new-task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .new-task-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .new-task-actions .cancel {
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .new-task-actions .start {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .new-task-actions .start:disabled { opacity: 0.5; }
+
+        /* Start Task Card (when no task active) */
+        .start-task-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .start-task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .start-task-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .start-task-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .start-task-input:focus { border-color: var(--primary-color); }
+        .start-task-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .start-task-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Contenido Principal */
         .main-content {
@@ -392,6 +504,8 @@
             const [currentTime, setCurrentTime] = useState(0);
             const [settings, setSettings] = useState(loadSettings());
             const [showSettings, setShowSettings] = useState(false);
+            const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+            const [newTaskName, setNewTaskName] = useState('');
             const fileInputRef = useRef(null);
 
             // Load tasks
@@ -511,6 +625,40 @@
                 setTasks(prev => prev.filter(t => t.name !== name));
             };
 
+            const switchTask = (newName) => {
+                if (!newName.trim()) return;
+
+                // Complete current task
+                if (currentTask) {
+                    const now = Date.now();
+                    let elapsed = currentTask.elapsedTime;
+                    if (currentTask.status === 'running') {
+                        elapsed += now - currentTask.startTime;
+                    }
+                    setTasks(prev => prev.map(t =>
+                        t.id === currentTask.id
+                            ? { ...t, status: 'completed', endTime: now, elapsedTime: elapsed }
+                            : t
+                    ));
+                }
+
+                // Create new task
+                const newTask = {
+                    id: Date.now().toString(),
+                    name: newName.trim(),
+                    startTime: Date.now(),
+                    endTime: null,
+                    elapsedTime: 0,
+                    status: 'running',
+                    createdAt: Date.now()
+                };
+                setTasks(prev => [...prev, newTask]);
+                setCurrentTask(newTask);
+                setTaskName(newName.trim());
+                setNewTaskName('');
+                setShowNewTaskForm(false);
+            };
+
             // Export/Import
             const exportData = () => {
                 const data = { tasks, settings, exportedAt: new Date().toISOString() };
@@ -569,51 +717,100 @@
 
             return (
                 <div className="app">
-                    {/* Timer Bar */}
-                    <div className="timer-bar">
-                        <div className="timer-content">
-                            <input
-                                className="task-input"
-                                placeholder="Que estas haciendo?"
-                                value={taskName}
-                                onChange={(e) => setTaskName(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && startTask()}
-                            />
-
-                            <div className="timer-display">
-                                {formatTime(currentTask ? currentTime : 0)}
-                            </div>
-
-                            {!currentTask ? (
-                                <button
-                                    className="timer-btn start"
-                                    onClick={startTask}
-                                    disabled={!taskName.trim()}
-                                    title="Iniciar"
-                                >
-                                    ▶
-                                </button>
-                            ) : (
-                                <>
-                                    {currentTask.status === 'running' ? (
-                                        <button className="timer-btn pause" onClick={pauseTask} title="Pausar">
-                                            ⏸
-                                        </button>
-                                    ) : (
-                                        <button className="timer-btn start" onClick={resumeTask} title="Continuar">
-                                            ▶
-                                        </button>
-                                    )}
-                                    <button className="timer-btn stop" onClick={stopTask} title="Detener">
-                                        ⏹
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                    {/* Header */}
+                    <div className="app-header">
+                        <div className="app-title">Time Tracker</div>
                     </div>
 
                     {/* Main Content */}
                     <div className="main-content">
+                        {/* Task Card - Active or Start */}
+                        {currentTask ? (
+                            <div className="active-task-card">
+                                <div className="active-task-label">Tarea Activa</div>
+                                <div className="active-task-name">{currentTask.name}</div>
+                                <div className="active-timer">{formatTime(currentTime)}</div>
+                                <div className="active-status">
+                                    {currentTask.status === 'running' ? 'En progreso' : 'En pausa'}
+                                </div>
+
+                                <div className="active-buttons">
+                                    {currentTask.status === 'running' ? (
+                                        <button className="active-btn pause" onClick={pauseTask}>
+                                            ⏸ Pausar
+                                        </button>
+                                    ) : (
+                                        <button className="active-btn resume" onClick={resumeTask}>
+                                            ▶ Reanudar
+                                        </button>
+                                    )}
+                                    <button className="active-btn complete" onClick={stopTask}>
+                                        ✓ Completar
+                                    </button>
+                                </div>
+
+                                {/* Nueva Tarea Section */}
+                                <div className="new-task-section">
+                                    {!showNewTaskForm ? (
+                                        <button
+                                            className="new-task-btn"
+                                            onClick={() => setShowNewTaskForm(true)}
+                                        >
+                                            + Nueva Tarea
+                                        </button>
+                                    ) : (
+                                        <div className="new-task-form">
+                                            <input
+                                                className="new-task-input"
+                                                placeholder="Nombre de la nueva tarea..."
+                                                value={newTaskName}
+                                                onChange={(e) => setNewTaskName(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && switchTask(newTaskName)}
+                                                autoFocus
+                                            />
+                                            <div className="new-task-actions">
+                                                <button
+                                                    className="cancel"
+                                                    onClick={() => {
+                                                        setShowNewTaskForm(false);
+                                                        setNewTaskName('');
+                                                    }}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    className="start"
+                                                    onClick={() => switchTask(newTaskName)}
+                                                    disabled={!newTaskName.trim()}
+                                                >
+                                                    Iniciar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="start-task-card">
+                                <div className="start-task-title">Nueva Tarea</div>
+                                <div className="start-task-subtitle">Escribe el nombre y comienza a registrar</div>
+                                <input
+                                    className="start-task-input"
+                                    placeholder="Que estas haciendo?"
+                                    value={taskName}
+                                    onChange={(e) => setTaskName(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && startTask()}
+                                />
+                                <button
+                                    className="start-task-submit"
+                                    onClick={startTask}
+                                    disabled={!taskName.trim()}
+                                >
+                                    ▶ Iniciar Tarea
+                                </button>
+                            </div>
+                        )}
+
                         {/* Stats */}
                         <div className="stats-row">
                             <div className="stat-card">
@@ -658,7 +855,7 @@
                             <div className="empty-state">
                                 <div className="empty-icon">⏱</div>
                                 <div className="empty-text">
-                                    Ingresa el nombre de una tarea y presiona play para comenzar
+                                    Las tareas completadas apareceran aqui
                                 </div>
                             </div>
                         ) : (
