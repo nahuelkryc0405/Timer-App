@@ -29,12 +29,24 @@
         /* Layout Principal */
         .app { min-height: 100vh; }
 
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
         .page-title {
             font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 24px;
         }
+        .mascot {
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+        .mascot:hover { transform: scale(1.2) rotate(10deg); }
 
         /* Tabs */
         .tabs-container {
@@ -66,6 +78,21 @@
             right: 0;
             height: 2px;
             background-color: var(--primary-color);
+        }
+
+        /* Tab Content Animation */
+        .tab-content {
+            animation: fadeSlideIn 0.3s ease-out;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Active Task Card */
@@ -468,11 +495,93 @@
         /* Hidden file input */
         .hidden-input { display: none; }
 
+        /* Chart Styles */
+        .chart-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .chart-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .chart-bar-container {
+            margin-bottom: 12px;
+        }
+        .chart-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .chart-bar-name {
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+        .chart-bar-value {
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .chart-bar-track {
+            height: 8px;
+            background-color: var(--bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chart-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
         /* Sessions Detail */
         .task-sessions-detail {
             border-top: 1px solid var(--border-color);
             background-color: var(--bg-dark);
             padding: 12px 16px;
+            animation: expandDown 0.3s ease-out;
+            overflow: hidden;
+        }
+        @keyframes expandDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
         }
         .sessions-header {
             font-size: 11px;
@@ -612,14 +721,17 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
         };
 
+        const MASCOTS = ['🐱', '🐶', '🦊', '🐼', '🐨', '🦁', '🐸', '🐵', '🦉', '🐧', '🐰', '🐻'];
+
         const loadSettings = () => {
             try {
                 return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
                     primaryColor: '#4CAF50',
-                    accentColor: '#2196F3'
+                    accentColor: '#2196F3',
+                    mascot: '🐱'
                 };
             } catch {
-                return { primaryColor: '#4CAF50', accentColor: '#2196F3' };
+                return { primaryColor: '#4CAF50', accentColor: '#2196F3', mascot: '🐱' };
             }
         };
 
@@ -899,11 +1011,22 @@
             const groupedTasks = useMemo(() => groupTasks(completedTasks), [completedTasks]);
             const todayGroupedTasks = useMemo(() => groupTasks(todayTasks), [todayTasks]);
 
+            const cycleMascot = () => {
+                const currentIndex = MASCOTS.indexOf(settings.mascot);
+                const nextIndex = (currentIndex + 1) % MASCOTS.length;
+                setSettings({...settings, mascot: MASCOTS[nextIndex]});
+            };
+
             return (
                 <div className="app">
                     {/* Main Content */}
                     <div className="main-content">
-                        <h1 className="page-title">Timer App</h1>
+                        <div className="page-header">
+                            <h1 className="page-title">Timer App</h1>
+                            <span className="mascot" onClick={cycleMascot} title="Click para cambiar mascota">
+                                {settings.mascot || '🐱'}
+                            </span>
+                        </div>
 
                         {/* Task Card - Active or Start */}
                         {currentTask ? (
@@ -1027,6 +1150,12 @@
                                 >
                                     Historial
                                 </button>
+                                <button
+                                    className={`tab-btn ${activeTab === 'charts' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('charts')}
+                                >
+                                    Charts
+                                </button>
                             </div>
                             <div className="toolbar">
                                 <button className="toolbar-btn" onClick={exportData}>Exportar</button>
@@ -1035,15 +1164,15 @@
                             </div>
                         </div>
 
-                        {/* Tab Content */}
-                        {activeTab === 'today' ? (
+                        {/* Tab Content - Today */}
+                        {activeTab === 'today' && (
                             todayGroupedTasks.length === 0 ? (
-                                <div className="empty-state" style={{padding: '40px 20px'}}>
+                                <div className="empty-state tab-content" style={{padding: '40px 20px'}}>
                                     <div className="empty-icon">⏱</div>
                                     <div className="empty-text">No hay tareas completadas hoy</div>
                                 </div>
                             ) : (
-                                <div>
+                                <div className="tab-content" key="today-tab">
                                     {todayGroupedTasks.map(task => (
                                         <div key={`today-${task.name}`} className="task-entry">
                                             <div
@@ -1084,14 +1213,17 @@
                                     ))}
                                 </div>
                             )
-                        ) : (
+                        )}
+
+                        {/* Tab Content - All History */}
+                        {activeTab === 'all' && (
                             groupedTasks.length === 0 ? (
-                                <div className="empty-state">
+                                <div className="empty-state tab-content">
                                     <div className="empty-icon">⏱</div>
                                     <div className="empty-text">Las tareas completadas apareceran aqui</div>
                                 </div>
                             ) : (
-                                <div>
+                                <div className="tab-content" key="all-tab">
                                     {groupedTasks.map(task => (
                                         <div key={task.name} className="task-entry">
                                             <div
@@ -1132,6 +1264,50 @@
                                     ))}
                                 </div>
                             )
+                        )}
+
+                        {/* Tab Content - Charts */}
+                        {activeTab === 'charts' && (
+                            <div className="tab-content" key="charts-tab">
+                                {groupedTasks.length === 0 ? (
+                                    <div className="empty-state" style={{padding: '40px 20px'}}>
+                                        <div className="empty-icon">📊</div>
+                                        <div className="empty-text">Completa algunas tareas para ver estadisticas</div>
+                                    </div>
+                                ) : (
+                                    <div className="chart-container">
+                                        <div className="chart-title">Tiempo por tarea (Top 10)</div>
+                                        {groupedTasks.slice(0, 10).map((task, idx) => {
+                                            const maxTime = groupedTasks[0].totalTime;
+                                            const percentage = (task.totalTime / maxTime) * 100;
+                                            return (
+                                                <div key={task.name} className="chart-bar-container">
+                                                    <div className="chart-bar-label">
+                                                        <span className="chart-bar-name">{task.name}</span>
+                                                        <span className="chart-bar-value">{formatTime(task.totalTime)}</span>
+                                                    </div>
+                                                    <div className="chart-bar-track">
+                                                        <div
+                                                            className="chart-bar-fill"
+                                                            style={{width: `${percentage}%`}}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        <div className="chart-legend">
+                                            <div className="chart-legend-item">
+                                                <div className="chart-legend-dot" style={{backgroundColor: 'var(--primary-color)'}} />
+                                                <span>Total: {formatTime(totalTime)}</span>
+                                            </div>
+                                            <div className="chart-legend-item">
+                                                <div className="chart-legend-dot" style={{backgroundColor: 'var(--accent-color)'}} />
+                                                <span>{groupedTasks.length} tareas</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
 
