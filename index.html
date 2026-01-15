@@ -429,6 +429,116 @@
 
         /* Hidden file input */
         .hidden-input { display: none; }
+
+        /* Task Entry Expandable */
+        .task-entry {
+            cursor: pointer;
+        }
+        .task-entry-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .task-sessions-detail {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--bg-dark);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .session-time {
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .session-date {
+            color: var(--text-secondary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .modal {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .modal-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .modal-input:focus {
+            border-color: var(--primary-color);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .modal-btn:hover { opacity: 0.9; }
+        .modal-btn.cancel {
+            background-color: var(--bg-hover);
+            color: var(--text-secondary);
+        }
+        .modal-btn.danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.edit { background-color: #FF9800; color: white; }
     </style>
 </head>
 <body>
@@ -506,6 +616,8 @@
             const [showSettings, setShowSettings] = useState(false);
             const [showNewTaskForm, setShowNewTaskForm] = useState(false);
             const [newTaskName, setNewTaskName] = useState('');
+            const [expandedTask, setExpandedTask] = useState(null);
+            const [modal, setModal] = useState(null); // { type: 'delete' | 'edit', taskName, editValue }
             const fileInputRef = useRef(null);
 
             // Load tasks
@@ -621,8 +733,21 @@
             };
 
             const deleteTask = (name) => {
-                if (!confirm(`Eliminar todas las sesiones de "${name}"?`)) return;
                 setTasks(prev => prev.filter(t => t.name !== name));
+                setModal(null);
+                setExpandedTask(null);
+            };
+
+            const editTaskName = (oldName, newName) => {
+                if (!newName.trim() || oldName === newName.trim()) {
+                    setModal(null);
+                    return;
+                }
+                setTasks(prev => prev.map(t =>
+                    t.name === oldName ? { ...t, name: newName.trim() } : t
+                ));
+                setModal(null);
+                if (expandedTask === oldName) setExpandedTask(newName.trim());
             };
 
             const switchTask = (newName) => {
@@ -704,13 +829,18 @@
                 const groups = {};
                 completedTasks.forEach(t => {
                     if (!groups[t.name]) {
-                        groups[t.name] = { name: t.name, totalTime: 0, lastModified: t.endTime, count: 0 };
+                        groups[t.name] = { name: t.name, totalTime: 0, lastModified: t.endTime, count: 0, sessions: [] };
                     }
                     groups[t.name].totalTime += t.elapsedTime;
                     groups[t.name].count++;
+                    groups[t.name].sessions.push(t);
                     if (t.endTime > groups[t.name].lastModified) {
                         groups[t.name].lastModified = t.endTime;
                     }
+                });
+                // Ordenar sesiones por fecha descendente
+                Object.values(groups).forEach(g => {
+                    g.sessions.sort((a, b) => b.endTime - a.endTime);
                 });
                 return Object.values(groups).sort((a, b) => b.lastModified - a.lastModified);
             }, [completedTasks]);
@@ -862,21 +992,26 @@
                             <div>
                                 {groupedTasks.map(task => (
                                     <div key={task.name} className="task-entry">
-                                        <div className="task-info">
-                                            <div className="task-name">
-                                                {task.name}
-                                                {task.count > 1 && (
-                                                    <span className="task-sessions">
-                                                        {task.count} sesiones
-                                                    </span>
-                                                )}
+                                        <div
+                                            className="task-entry-header"
+                                            onClick={() => setExpandedTask(expandedTask === task.name ? null : task.name)}
+                                        >
+                                            <div className="task-info">
+                                                <div className="task-name">
+                                                    {task.name}
+                                                    {task.count > 1 && (
+                                                        <span className="task-sessions">
+                                                            {task.count} sesiones
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="task-meta">
+                                                    {formatDateTime(task.lastModified)}
+                                                </div>
                                             </div>
-                                            <div className="task-meta">
-                                                {formatDateTime(task.lastModified)}
-                                            </div>
+                                            <div className="task-time">{formatTime(task.totalTime)}</div>
                                         </div>
-                                        <div className="task-time">{formatTime(task.totalTime)}</div>
-                                        <div className="task-actions">
+                                        <div className="task-actions" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 className="action-btn play"
                                                 onClick={() => continueTask(task.name)}
@@ -885,13 +1020,32 @@
                                                 ▶
                                             </button>
                                             <button
+                                                className="action-btn edit"
+                                                onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })}
+                                                title="Editar"
+                                            >
+                                                ✎
+                                            </button>
+                                            <button
                                                 className="action-btn delete"
-                                                onClick={() => deleteTask(task.name)}
+                                                onClick={() => setModal({ type: 'delete', taskName: task.name })}
                                                 title="Eliminar"
                                             >
                                                 ✕
                                             </button>
                                         </div>
+
+                                        {/* Sesiones expandidas */}
+                                        {expandedTask === task.name && task.sessions.length > 0 && (
+                                            <div className="task-sessions-detail">
+                                                {task.sessions.map((session, idx) => (
+                                                    <div key={session.id} className="session-item">
+                                                        <span className="session-time">{formatTime(session.elapsedTime)}</span>
+                                                        <span className="session-date">{formatDateTime(session.endTime)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -952,6 +1106,59 @@
                             </button>
                         </div>
                     </div>
+
+                    {/* Modal de Eliminar */}
+                    {modal?.type === 'delete' && (
+                        <div className="modal-overlay" onClick={() => setModal(null)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Eliminar tarea</div>
+                                <div className="modal-message">
+                                    ¿Estas seguro de eliminar todas las sesiones de <strong>"{modal.taskName}"</strong>?
+                                    <br/><br/>
+                                    Esta accion no se puede deshacer.
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-btn cancel" onClick={() => setModal(null)}>
+                                        Cancelar
+                                    </button>
+                                    <button className="modal-btn danger" onClick={() => deleteTask(modal.taskName)}>
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal de Editar */}
+                    {modal?.type === 'edit' && (
+                        <div className="modal-overlay" onClick={() => setModal(null)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Editar nombre</div>
+                                <div className="modal-message">
+                                    Nuevo nombre para la tarea:
+                                </div>
+                                <input
+                                    className="modal-input"
+                                    value={modal.editValue}
+                                    onChange={(e) => setModal({ ...modal, editValue: e.target.value })}
+                                    onKeyPress={(e) => e.key === 'Enter' && editTaskName(modal.taskName, modal.editValue)}
+                                    autoFocus
+                                />
+                                <div className="modal-actions">
+                                    <button className="modal-btn cancel" onClick={() => setModal(null)}>
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        className="modal-btn primary"
+                                        onClick={() => editTaskName(modal.taskName, modal.editValue)}
+                                        disabled={!modal.editValue.trim()}
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
