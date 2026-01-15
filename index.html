@@ -262,6 +262,7 @@
             align-items: center;
             gap: 16px;
             transition: background-color 0.2s;
+            cursor: pointer;
         }
         .task-entry:hover { background-color: var(--bg-hover); }
 
@@ -420,20 +421,15 @@
 
         /* Mobile */
         @media (max-width: 768px) {
-            .timer-content { flex-wrap: wrap; }
-            .task-input { order: 1; flex-basis: 100%; }
-            .timer-display { font-size: 28px; }
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .settings-panel { width: 100%; right: -100%; }
+            .active-timer { font-size: 36px; }
         }
 
         /* Hidden file input */
         .hidden-input { display: none; }
 
         /* Task Entry Expandable */
-        .task-entry {
-            cursor: pointer;
-        }
         .task-entry-header {
             display: flex;
             align-items: center;
@@ -825,9 +821,9 @@
             const todayBreaks = calculateBreakTime(todayTasks);
 
             // Group tasks by name
-            const groupedTasks = useMemo(() => {
+            const groupTasks = (taskList) => {
                 const groups = {};
-                completedTasks.forEach(t => {
+                taskList.forEach(t => {
                     if (!groups[t.name]) {
                         groups[t.name] = { name: t.name, totalTime: 0, lastModified: t.endTime, count: 0, sessions: [] };
                     }
@@ -838,12 +834,14 @@
                         groups[t.name].lastModified = t.endTime;
                     }
                 });
-                // Ordenar sesiones por fecha descendente
                 Object.values(groups).forEach(g => {
                     g.sessions.sort((a, b) => b.endTime - a.endTime);
                 });
                 return Object.values(groups).sort((a, b) => b.lastModified - a.lastModified);
-            }, [completedTasks]);
+            };
+
+            const groupedTasks = useMemo(() => groupTasks(completedTasks), [completedTasks]);
+            const todayGroupedTasks = useMemo(() => groupTasks(todayTasks), [todayTasks]);
 
             return (
                 <div className="app">
@@ -961,32 +959,68 @@
                             </div>
                         </div>
 
-                        {/* Task List */}
+                        {/* Historial de Hoy */}
                         <div className="section-header">
-                            <div className="section-title">Historial</div>
+                            <div className="section-title">Hoy</div>
+                        </div>
+
+                        {todayGroupedTasks.length === 0 ? (
+                            <div className="empty-state" style={{padding: '30px 20px'}}>
+                                <div className="empty-text">No hay tareas completadas hoy</div>
+                            </div>
+                        ) : (
+                            <div style={{marginBottom: '32px'}}>
+                                {todayGroupedTasks.map(task => (
+                                    <div key={`today-${task.name}`} className="task-entry">
+                                        <div
+                                            className="task-entry-header"
+                                            onClick={() => setExpandedTask(expandedTask === `today-${task.name}` ? null : `today-${task.name}`)}
+                                        >
+                                            <div className="task-info">
+                                                <div className="task-name">
+                                                    {task.name}
+                                                    {task.count > 1 && (
+                                                        <span className="task-sessions">{task.count} sesiones</span>
+                                                    )}
+                                                </div>
+                                                <div className="task-meta">{formatDateTime(task.lastModified)}</div>
+                                            </div>
+                                            <div className="task-time">{formatTime(task.totalTime)}</div>
+                                        </div>
+                                        <div className="task-actions" onClick={(e) => e.stopPropagation()}>
+                                            <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
+                                            <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
+                                            <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
+                                        </div>
+                                        {expandedTask === `today-${task.name}` && task.sessions.length > 0 && (
+                                            <div className="task-sessions-detail">
+                                                {task.sessions.map(session => (
+                                                    <div key={session.id} className="session-item">
+                                                        <span className="session-time">{formatTime(session.elapsedTime)}</span>
+                                                        <span className="session-date">{formatDateTime(session.endTime)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Historial General */}
+                        <div className="section-header">
+                            <div className="section-title">Historial General</div>
                             <div className="toolbar">
-                                <button className="toolbar-btn" onClick={exportData}>
-                                    Exportar JSON
-                                </button>
-                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()}>
-                                    Importar JSON
-                                </button>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".json"
-                                    className="hidden-input"
-                                    onChange={importData}
-                                />
+                                <button className="toolbar-btn" onClick={exportData}>Exportar</button>
+                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()}>Importar</button>
+                                <input ref={fileInputRef} type="file" accept=".json" className="hidden-input" onChange={importData} />
                             </div>
                         </div>
 
                         {groupedTasks.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-icon">⏱</div>
-                                <div className="empty-text">
-                                    Las tareas completadas apareceran aqui
-                                </div>
+                                <div className="empty-text">Las tareas completadas apareceran aqui</div>
                             </div>
                         ) : (
                             <div>
@@ -1000,45 +1034,21 @@
                                                 <div className="task-name">
                                                     {task.name}
                                                     {task.count > 1 && (
-                                                        <span className="task-sessions">
-                                                            {task.count} sesiones
-                                                        </span>
+                                                        <span className="task-sessions">{task.count} sesiones</span>
                                                     )}
                                                 </div>
-                                                <div className="task-meta">
-                                                    {formatDateTime(task.lastModified)}
-                                                </div>
+                                                <div className="task-meta">{formatDateTime(task.lastModified)}</div>
                                             </div>
                                             <div className="task-time">{formatTime(task.totalTime)}</div>
                                         </div>
                                         <div className="task-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                className="action-btn play"
-                                                onClick={() => continueTask(task.name)}
-                                                title="Continuar"
-                                            >
-                                                ▶
-                                            </button>
-                                            <button
-                                                className="action-btn edit"
-                                                onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })}
-                                                title="Editar"
-                                            >
-                                                ✎
-                                            </button>
-                                            <button
-                                                className="action-btn delete"
-                                                onClick={() => setModal({ type: 'delete', taskName: task.name })}
-                                                title="Eliminar"
-                                            >
-                                                ✕
-                                            </button>
+                                            <button className="action-btn play" onClick={() => continueTask(task.name)} title="Continuar">▶</button>
+                                            <button className="action-btn edit" onClick={() => setModal({ type: 'edit', taskName: task.name, editValue: task.name })} title="Editar">✎</button>
+                                            <button className="action-btn delete" onClick={() => setModal({ type: 'delete', taskName: task.name })} title="Eliminar">✕</button>
                                         </div>
-
-                                        {/* Sesiones expandidas */}
                                         {expandedTask === task.name && task.sessions.length > 0 && (
                                             <div className="task-sessions-detail">
-                                                {task.sessions.map((session, idx) => (
+                                                {task.sessions.map(session => (
                                                     <div key={session.id} className="session-item">
                                                         <span className="session-time">{formatTime(session.elapsedTime)}</span>
                                                         <span className="session-date">{formatDateTime(session.endTime)}</span>
