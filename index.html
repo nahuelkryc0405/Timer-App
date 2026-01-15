@@ -32,21 +32,17 @@
         .page-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 24px;
+        }
+        .page-icon {
+            font-size: 28px;
         }
         .page-title {
             font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
         }
-        .mascot {
-            font-size: 32px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            user-select: none;
-        }
-        .mascot:hover { transform: scale(1.2) rotate(10deg); }
 
         /* Tabs */
         .tabs-container {
@@ -496,6 +492,14 @@
         .hidden-input { display: none; }
 
         /* Chart Styles */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
         .chart-container {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -504,8 +508,79 @@
         }
         .chart-title {
             font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        .chart-subtitle {
+            font-size: 12px;
             color: var(--text-secondary);
             margin-bottom: 16px;
+        }
+
+        /* Pie Chart */
+        .pie-chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .pie-chart {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .pie-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background-color: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .pie-center-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+        }
+        .pie-center-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        .pie-legend {
+            width: 100%;
+        }
+        .pie-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+        .pie-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .pie-legend-name {
+            flex: 1;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pie-legend-value {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
         }
         .chart-bar-container {
             margin-bottom: 12px;
@@ -721,17 +796,16 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
         };
 
-        const MASCOTS = ['🐱', '🐶', '🦊', '🐼', '🐨', '🦁', '🐸', '🐵', '🦉', '🐧', '🐰', '🐻'];
+        const PIE_COLORS = ['#4CAF50', '#2196F3', '#FF9800', '#E91E63', '#9C27B0', '#00BCD4', '#FFEB3B', '#795548'];
 
         const loadSettings = () => {
             try {
                 return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {
                     primaryColor: '#4CAF50',
-                    accentColor: '#2196F3',
-                    mascot: '🐱'
+                    accentColor: '#2196F3'
                 };
             } catch {
-                return { primaryColor: '#4CAF50', accentColor: '#2196F3', mascot: '🐱' };
+                return { primaryColor: '#4CAF50', accentColor: '#2196F3' };
             }
         };
 
@@ -1011,10 +1085,20 @@
             const groupedTasks = useMemo(() => groupTasks(completedTasks), [completedTasks]);
             const todayGroupedTasks = useMemo(() => groupTasks(todayTasks), [todayTasks]);
 
-            const cycleMascot = () => {
-                const currentIndex = MASCOTS.indexOf(settings.mascot);
-                const nextIndex = (currentIndex + 1) % MASCOTS.length;
-                setSettings({...settings, mascot: MASCOTS[nextIndex]});
+            // Generate pie chart conic-gradient
+            const getPieGradient = (tasks, total) => {
+                if (!tasks.length || !total) return 'var(--bg-dark)';
+                let cumulative = 0;
+                const segments = tasks.slice(0, 8).map((task, idx) => {
+                    const percentage = (task.totalTime / total) * 100;
+                    const start = cumulative;
+                    cumulative += percentage;
+                    return `${PIE_COLORS[idx % PIE_COLORS.length]} ${start}% ${cumulative}%`;
+                });
+                if (cumulative < 100) {
+                    segments.push(`var(--bg-hover) ${cumulative}% 100%`);
+                }
+                return `conic-gradient(${segments.join(', ')})`;
             };
 
             return (
@@ -1022,10 +1106,8 @@
                     {/* Main Content */}
                     <div className="main-content">
                         <div className="page-header">
+                            <span className="page-icon">⏱️</span>
                             <h1 className="page-title">Timer App</h1>
-                            <span className="mascot" onClick={cycleMascot} title="Click para cambiar mascota">
-                                {settings.mascot || '🐱'}
-                            </span>
                         </div>
 
                         {/* Task Card - Active or Start */}
@@ -1269,40 +1351,78 @@
                         {/* Tab Content - Charts */}
                         {activeTab === 'charts' && (
                             <div className="tab-content" key="charts-tab">
-                                {groupedTasks.length === 0 ? (
+                                {groupedTasks.length === 0 && todayGroupedTasks.length === 0 ? (
                                     <div className="empty-state" style={{padding: '40px 20px'}}>
                                         <div className="empty-icon">📊</div>
                                         <div className="empty-text">Completa algunas tareas para ver estadisticas</div>
                                     </div>
                                 ) : (
-                                    <div className="chart-container">
-                                        <div className="chart-title">Tiempo por tarea (Top 10)</div>
-                                        {groupedTasks.slice(0, 10).map((task, idx) => {
-                                            const maxTime = groupedTasks[0].totalTime;
-                                            const percentage = (task.totalTime / maxTime) * 100;
-                                            return (
-                                                <div key={task.name} className="chart-bar-container">
-                                                    <div className="chart-bar-label">
-                                                        <span className="chart-bar-name">{task.name}</span>
-                                                        <span className="chart-bar-value">{formatTime(task.totalTime)}</span>
+                                    <div className="charts-grid">
+                                        {/* Pie Chart - Today */}
+                                        <div className="chart-container">
+                                            <div className="chart-title">Distribucion de Hoy</div>
+                                            {todayGroupedTasks.length === 0 ? (
+                                                <div className="empty-state" style={{padding: '20px'}}>
+                                                    <div className="empty-text">Sin tareas hoy</div>
+                                                </div>
+                                            ) : (
+                                                <div className="pie-chart-wrapper">
+                                                    <div
+                                                        className="pie-chart"
+                                                        style={{background: getPieGradient(todayGroupedTasks, todayTime)}}
+                                                    >
+                                                        <div className="pie-center">
+                                                            <div className="pie-center-value">{formatTime(todayTime)}</div>
+                                                            <div className="pie-center-label">Total hoy</div>
+                                                        </div>
                                                     </div>
-                                                    <div className="chart-bar-track">
-                                                        <div
-                                                            className="chart-bar-fill"
-                                                            style={{width: `${percentage}%`}}
-                                                        />
+                                                    <div className="pie-legend">
+                                                        {todayGroupedTasks.slice(0, 8).map((task, idx) => (
+                                                            <div key={task.name} className="pie-legend-item">
+                                                                <div
+                                                                    className="pie-legend-color"
+                                                                    style={{backgroundColor: PIE_COLORS[idx % PIE_COLORS.length]}}
+                                                                />
+                                                                <span className="pie-legend-name">{task.name}</span>
+                                                                <span className="pie-legend-value">{formatTime(task.totalTime)}</span>
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                        <div className="chart-legend">
-                                            <div className="chart-legend-item">
-                                                <div className="chart-legend-dot" style={{backgroundColor: 'var(--primary-color)'}} />
-                                                <span>Total: {formatTime(totalTime)}</span>
-                                            </div>
-                                            <div className="chart-legend-item">
-                                                <div className="chart-legend-dot" style={{backgroundColor: 'var(--accent-color)'}} />
-                                                <span>{groupedTasks.length} tareas</span>
+                                            )}
+                                        </div>
+
+                                        {/* Bar Chart - All Time */}
+                                        <div className="chart-container">
+                                            <div className="chart-title">Tiempo Total por Tarea</div>
+                                            <div className="chart-subtitle">Top 8 tareas</div>
+                                            {groupedTasks.slice(0, 8).map((task, idx) => {
+                                                const maxTime = groupedTasks[0].totalTime;
+                                                const percentage = (task.totalTime / maxTime) * 100;
+                                                return (
+                                                    <div key={task.name} className="chart-bar-container">
+                                                        <div className="chart-bar-label">
+                                                            <span className="chart-bar-name">{task.name}</span>
+                                                            <span className="chart-bar-value">{formatTime(task.totalTime)}</span>
+                                                        </div>
+                                                        <div className="chart-bar-track">
+                                                            <div
+                                                                className="chart-bar-fill"
+                                                                style={{width: `${percentage}%`}}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                            <div className="chart-legend">
+                                                <div className="chart-legend-item">
+                                                    <div className="chart-legend-dot" style={{backgroundColor: 'var(--primary-color)'}} />
+                                                    <span>Total: {formatTime(totalTime)}</span>
+                                                </div>
+                                                <div className="chart-legend-item">
+                                                    <div className="chart-legend-dot" style={{backgroundColor: 'var(--accent-color)'}} />
+                                                    <span>{groupedTasks.length} tareas</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
