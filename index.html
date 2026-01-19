@@ -856,6 +856,8 @@
             const [expandedTask, setExpandedTask] = useState(null);
             const [modal, setModal] = useState(null);
             const [activeTab, setActiveTab] = useState('today');
+            const [todayLiveTime, setTodayLiveTime] = useState(0);
+            const [todayTaskCount, setTodayTaskCount] = useState(0);
             const fileInputRef = useRef(null);
 
             // Load tasks
@@ -1085,6 +1087,35 @@
             const groupedTasks = useMemo(() => groupTasks(completedTasks), [completedTasks]);
             const todayGroupedTasks = useMemo(() => groupTasks(todayTasks), [todayTasks]);
 
+            const updateTodayStats = React.useCallback(() => {
+                let liveTime = todayTime;
+                let liveCount = todayGroupedTasks.length;
+
+                if (currentTask && isToday(currentTask.startTime)) {
+                    const runningElapsed = currentTask.status === 'running'
+                        ? currentTask.elapsedTime + (Date.now() - currentTask.startTime)
+                        : currentTask.elapsedTime;
+                    liveTime += runningElapsed;
+                    if (!todayGroupedTasks.some(task => task.name === currentTask.name)) {
+                        liveCount += 1;
+                    }
+                }
+
+                setTodayLiveTime(liveTime);
+                setTodayTaskCount(liveCount);
+            }, [todayTime, todayGroupedTasks, currentTask]);
+
+            useEffect(() => {
+                updateTodayStats();
+            }, [updateTodayStats]);
+
+            useEffect(() => {
+                if (!currentTask || currentTask.status !== 'running' || !isToday(currentTask.startTime)) return;
+                updateTodayStats();
+                const interval = setInterval(updateTodayStats, 600000);
+                return () => clearInterval(interval);
+            }, [currentTask, updateTodayStats]);
+
             // Generate pie chart conic-gradient
             const getPieGradient = (tasks, total) => {
                 if (!tasks.length || !total) return 'var(--bg-dark)';
@@ -1201,7 +1232,11 @@
                         <div className="stats-row">
                             <div className="stat-card">
                                 <div className="stat-label">Hoy</div>
-                                <div className="stat-value">{formatTime(todayTime)}</div>
+                                <div className="stat-value">{formatTime(todayLiveTime || todayTime)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">Tareas Hoy</div>
+                                <div className="stat-value accent">{todayTaskCount || todayGroupedTasks.length}</div>
                             </div>
                             <div className="stat-card">
                                 <div className="stat-label">Breaks Hoy</div>
@@ -1369,10 +1404,10 @@
                                                 <div className="pie-chart-wrapper">
                                                     <div
                                                         className="pie-chart"
-                                                        style={{background: getPieGradient(todayGroupedTasks, todayTime)}}
+                                                        style={{background: getPieGradient(todayGroupedTasks, todayLiveTime || todayTime)}}
                                                     >
                                                         <div className="pie-center">
-                                                            <div className="pie-center-value">{formatTime(todayTime)}</div>
+                                                            <div className="pie-center-value">{formatTime(todayLiveTime || todayTime)}</div>
                                                             <div className="pie-center-label">Total hoy</div>
                                                         </div>
                                                     </div>
